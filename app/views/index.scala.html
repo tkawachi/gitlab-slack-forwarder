@@ -1,5 +1,17 @@
-@()
+@(maybeUser: Option[glsf.User], clientId: String, callback: String)
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
+@main("GitLab Slack forwarder") {
+<h1>GitLab Slack forwarder</h1>
+
+@maybeUser match {
+case Some(user) => {
+    You're logged in.
+}
+case None => {
+<a href="https://slack.com/oauth/v2/authorize?user_scope=identity.basic&client_id=@clientId&redirect_uri=@callback"><img
+        alt="Sign in with Slack" height="40" width="172"
+        src="https://platform.slack-edge.com/img/sign_in_with_slack.png"
+        srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@@2x.png 2x"/></a>
+}
+}
 }
