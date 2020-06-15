@@ -2,7 +2,7 @@ package util
 
 import play.api.mvc.Result
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class ResultCont[A](run: (A => Future[Result]) => Future[Result]) {
   def map[B](f: A => B): ResultCont[B] = ResultCont(cb => run(a => cb(f(a))))
@@ -35,4 +35,19 @@ case class ResultCont[A](run: (A => Future[Result]) => Future[Result]) {
 
 object ResultCont {
   def pure[A](a: A): ResultCont[A] = ResultCont(cb => cb(a))
+
+  def fromFuture[A](
+    future: => Future[A]
+  )(implicit ec: ExecutionContext): ResultCont[A] =
+    ResultCont(cb => future.flatMap(cb))
+
+  def futureResult[A](result: => Future[Result]): ResultCont[A] =
+    ResultCont(_ => result)
+
+  def result[A](result: Result): ResultCont[A] =
+    futureResult(Future.successful(result))
+
+  def fromOption[A](option: Option[A])(ifEmpty: => Result): ResultCont[A] =
+    option.fold[ResultCont[A]](result(ifEmpty))(pure)
+
 }

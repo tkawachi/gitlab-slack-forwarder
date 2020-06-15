@@ -6,6 +6,9 @@
 @maybeUser match {
 case Some(user) => {
     You're logged in.
+    <div>
+        <a href="@{routes.LogoutController.logout}">Logout</a>
+    </div>
 }
 case None => {
 <a href="https://slack.com/oauth/v2/authorize?user_scope=identity.basic&client_id=@clientId&redirect_uri=@callback"><img

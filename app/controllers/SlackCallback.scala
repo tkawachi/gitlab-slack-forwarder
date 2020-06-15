@@ -1,17 +1,14 @@
 package controllers
 
-import glsf.{SlackConfig, User}
+import glsf.SlackConfig
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{
-  AbstractController,
-  Action,
-  AnyContent,
-  ControllerComponents
-}
+import play.api.mvc._
+import util.ResultCont
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import scala.util.control.NonFatal
 
 @Singleton
 class SlackCallback @Inject()(cc: ControllerComponents,
@@ -19,9 +16,18 @@ class SlackCallback @Inject()(cc: ControllerComponents,
                               slackConfig: SlackConfig,
                               implicit val ec: ExecutionContext)
     extends AbstractController(cc) {
-  def callback: Action[AnyContent] = Action.async { request =>
-    request.getQueryString("code") match {
-      case Some(code) =>
+
+  private def getCode(request: Request[_]): ResultCont[String] =
+    ResultCont.fromOption(request.getQueryString("code"))(
+      BadRequest(
+        views.html
+          .error("Failed to sign in Slack", "Failed to sign in Slack")
+      )
+    )
+
+  private def getAccessJson(code: String): ResultCont[JsValue] = {
+    ResultCont
+      .fromFuture(
         ws.url(slackConfig.accessUrl)
           .post(
             Map(
@@ -31,37 +37,65 @@ class SlackCallback @Inject()(cc: ControllerComponents,
               "redirect_uri" -> Seq(slackConfig.redirectUri)
             )
           )
-          .map { resp =>
-            if (resp.status != 200) {
-              BadRequest(
-                views.html.error("Slack error", "Slack response is not 200")
-              )
-            } else {
-              val json = Json.parse(resp.body)
-              val ok = (json \ "ok").as[Boolean]
-              if (!ok) {
+      )
+      .flatMap { resp =>
+        if (resp.status != 200) {
+          ResultCont.result(
+            BadRequest(
+              views.html.error("Slack error", "Slack response is not 200")
+            )
+          )
+        } else {
+          try {
+            ResultCont.pure(Json.parse(resp.body))
+          } catch {
+            case NonFatal(e) =>
+              ResultCont.result(
                 BadRequest(
-                  views.html.error("Slack error", "Slack response ok = false")
+                  views.html.error("Slack error", "Slack returns invalid JSON")
                 )
-              } else {
-                val userId = (json \ "authed_user" \ "id").as[String]
-                // (json \ "authed_user" \ "access_token").as[String]
-                val teamId = (json \ "team" \ "id").as[String]
-//                val user = User(teamId, userId)
-//                Ok(s"${resp.status} ${resp.body}").withNewSession
-//                  .withSession("teamId" -> teamId, "userId" -> userId)
-                Redirect(routes.HomeController.index()).withNewSession
-                  .withSession("teamId" -> teamId, "userId" -> userId)
-              }
-            }
+              )
           }
-      case None =>
-        Future.successful(
+        }
+      }
+  }
+
+  private def checkOk(json: JsValue): ResultCont[Unit] =
+    try {
+      val ok = (json \ "ok").as[Boolean]
+      if (!ok) {
+        ResultCont.result(
+          BadRequest(
+            views.html.error("Slack error", "Slack response ok = false")
+          )
+        )
+      } else {
+        ResultCont.pure(())
+      }
+    } catch {
+      case NonFatal(_) =>
+        ResultCont.result(
           BadRequest(
             views.html
-              .error("Failed to sign in Slack", "Failed to sign in Slack")
+              .error("Slack error", "Slack response doesn't contain 'ok'")
           )
         )
     }
+
+  def callback: Action[AnyContent] = Action.async { request =>
+    (for {
+      code <- getCode(request)
+      json <- getAccessJson(code)
+      _ <- checkOk(json)
+    } yield {
+      val userId = (json \ "authed_user" \ "id").as[String]
+      // (json \ "authed_user" \ "access_token").as[String]
+      val teamId = (json \ "team" \ "id").as[String]
+      //                val user = User(teamId, userId)
+      //                Ok(s"${resp.status} ${resp.body}").withNewSession
+      //                  .withSession("teamId" -> teamId, "userId" -> userId)
+      Redirect(routes.HomeController.index()).withNewSession
+        .withSession("teamId" -> teamId, "userId" -> userId)
+    }).run_
   }
 }
