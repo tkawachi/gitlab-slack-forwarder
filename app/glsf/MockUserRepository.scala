@@ -1,7 +1,10 @@
 package glsf
+import javax.inject.Singleton
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
+@Singleton
 class MockUserRepository extends UserRepository {
   private[this] val m = ListBuffer.empty[User]
 
