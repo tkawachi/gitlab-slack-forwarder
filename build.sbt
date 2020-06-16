@@ -12,6 +12,8 @@ libraryDependencies += ws
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.12.3"
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 
+dockerRepository := Some("us.gcr.io/gitlabmailslackforwarder")
+
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "net.pikot.controllers._"
 
