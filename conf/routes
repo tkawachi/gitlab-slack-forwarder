@@ -11,3 +11,4 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET /slack/callback controllers.SlackCallback.callback
 GET /logout controllers.LogoutController.logout
+POST /forward controllers.ForwardController.post

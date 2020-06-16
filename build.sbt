@@ -11,6 +11,7 @@ libraryDependencies += guice
 libraryDependencies += ws
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.12.3"
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
 
 dockerRepository := Some("us.gcr.io/gitlabmailslackforwarder")
 

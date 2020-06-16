@@ -6,7 +6,9 @@ import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
 class AppModule extends AbstractModule {
-  override def configure(): Unit = {}
+  override def configure(): Unit = {
+    bind(classOf[UserRepository]).to(classOf[MockUserRepository])
+  }
 
   @Provides
   def appConfig(config: Config): AppConfig = {
@@ -22,4 +24,8 @@ class AppModule extends AbstractModule {
       case Right(c)  => c
       case Left(err) => sys.error(err.prettyPrint())
     }
+
+  @Provides
+  def mailGenerator(appConfig: AppConfig): MailGenerator =
+    new MailGenerator(appConfig.mailDomain)
 }

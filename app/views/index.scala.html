@@ -5,7 +5,7 @@
 
 @maybeUser match {
 case Some(user) => {
-    You're logged in.
+    Please set <code>@{user.mail}</code> as GitLab notification address.
     <div>
         <a href="@{routes.LogoutController.logout}">Logout</a>
     </div>
