@@ -1,5 +1,8 @@
 package controllers
 
+import com.slack.api.Slack
+import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder
 import com.typesafe.scalalogging.LazyLogging
 import glsf.{TeamTokenRepository, User, UserRepository}
 import javax.inject.{Inject, Singleton}
@@ -23,6 +26,8 @@ class ForwardController @Inject()(cc: ControllerComponents,
     extends AbstractController(cc)
     with LazyLogging {
 
+  private val slack = Slack.getInstance()
+
   private def findUser(to: String): ResultCont[User] =
     ResultCont.fromFuture(userRepository.findBy(to)).getOrResult {
       logger.info(s"Message come to unknown mail: $to")
@@ -31,10 +36,28 @@ class ForwardController @Inject()(cc: ControllerComponents,
 
   private def notifySlack(user: User,
                           subject: String,
-                          text: String): ResultCont[Unit] = ResultCont.pure {
-    // TODO
-    logger.info(s"TODO Send messag to Slack: $user $subject $text")
-  }
+                          text: String): ResultCont[Unit] =
+    ResultCont
+      .fromFuture(teamTokenRepository.findBy(user.teamId))
+      .getOrResult {
+        logger.info(s"Not found teamId ${user.teamId}")
+        NotFound
+      }
+      .flatMap { teamToken =>
+        ResultCont.pure {
+          logger.info(s"Send messag to Slack: $user $subject $text")
+          val m = slack.methods(teamToken.botAccessToken)
+          val message = ChatPostMessageRequest
+            .builder()
+            .channel(user.userId)
+            .text(subject + "\n" + text)
+            .build()
+          val resp = m.chatPostMessage(message) // TODO change ExecutionContext
+          if (!resp.isOk) {
+            logger.error(resp.toString)
+          }
+        }
+      }
 
   def post: Action[MultipartFormData[Files.TemporaryFile]] =
     Action.async(cc.parsers.multipartFormData) { implicit request =>
