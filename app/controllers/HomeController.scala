@@ -1,9 +1,11 @@
 package controllers
 
-import glsf.{AppConfig, SlackConfig, User}
+import glsf.{AppConfig, SlackConfig, TeamToken, TeamTokenRepository, User}
 import javax.inject._
 import play.api.mvc._
 import util.ResultCont
+
+import scala.concurrent.ExecutionContext
 
 /**
   * This controller creates an `Action` to handle HTTP requests to the
@@ -12,8 +14,13 @@ import util.ResultCont
 @Singleton
 class HomeController @Inject()(val controllerComponents: ControllerComponents,
                                slackConfig: SlackConfig,
-                               authentication: Authentication)
+                               authentication: Authentication,
+                               teamTokenRepository: TeamTokenRepository,
+                               implicit val ec: ExecutionContext)
     extends BaseController {
+
+  private def findTeamToken(teamId: String): ResultCont[Option[TeamToken]] =
+    ResultCont.fromFuture(teamTokenRepository.findBy(teamId))
 
   /**
     * Create an Action to render an HTML page.
@@ -24,14 +31,21 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents,
     */
   def index(): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
-      authentication
-        .auth(request)
-        .map { maybeUser =>
-          Ok(
-            views.html
-              .index(maybeUser, slackConfig.clientId, slackConfig.redirectUri)
-          )
-        }
-        .run_
+      (for {
+        maybeUser <- authentication.auth(request)
+        maybeTeamToken <- maybeUser.fold(
+          ResultCont.pure(None: Option[TeamToken])
+        )(u => findTeamToken(u.teamId))
+      } yield
+        Ok(
+          views.html
+            .index(
+              maybeUser,
+              maybeTeamToken,
+              slackConfig.clientId,
+              slackConfig.signInRedirectUri,
+              slackConfig.addRedirectUri
+            )
+        )).run_
   }
 }

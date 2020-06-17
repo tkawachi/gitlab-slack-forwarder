@@ -8,6 +8,7 @@ import pureconfig.generic.auto._
 class AppModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[UserRepository]).to(classOf[MockUserRepository])
+    bind(classOf[TeamTokenRepository]).to(classOf[MockTeamTokenRepository])
   }
 
   @Provides

@@ -1,6 +1,14 @@
 package controllers
 
-import glsf.SlackConfig
+import com.typesafe.scalalogging.LazyLogging
+import glsf.{
+  MailGenerator,
+  SlackConfig,
+  TeamToken,
+  TeamTokenRepository,
+  User,
+  UserRepository
+}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -14,8 +22,12 @@ import scala.util.control.NonFatal
 class SlackCallback @Inject()(cc: ControllerComponents,
                               ws: WSClient,
                               slackConfig: SlackConfig,
+                              mailGenerator: MailGenerator,
+                              userRepository: UserRepository,
+                              teamTokenRepository: TeamTokenRepository,
                               implicit val ec: ExecutionContext)
-    extends AbstractController(cc) {
+    extends AbstractController(cc)
+    with LazyLogging {
 
   private def getCode(request: Request[_]): ResultCont[String] =
     ResultCont.fromOption(request.getQueryString("code"))(
@@ -25,7 +37,8 @@ class SlackCallback @Inject()(cc: ControllerComponents,
       )
     )
 
-  private def getAccessJson(code: String): ResultCont[JsValue] = {
+  private def getAccessJson(code: String,
+                            redirectUri: String): ResultCont[JsValue] = {
     ResultCont
       .fromFuture(
         ws.url(slackConfig.accessUrl)
@@ -34,7 +47,7 @@ class SlackCallback @Inject()(cc: ControllerComponents,
               "code" -> Seq(code),
               "client_id" -> Seq(slackConfig.clientId),
               "client_secret" -> Seq(slackConfig.clientSecret),
-              "redirect_uri" -> Seq(slackConfig.redirectUri)
+              "redirect_uri" -> Seq(redirectUri)
             )
           )
       )
@@ -64,6 +77,7 @@ class SlackCallback @Inject()(cc: ControllerComponents,
     try {
       val ok = (json \ "ok").as[Boolean]
       if (!ok) {
+        logger.info(s"ok=false $json")
         ResultCont.result(
           BadRequest(
             views.html.error("Slack error", "Slack response ok = false")
@@ -82,20 +96,42 @@ class SlackCallback @Inject()(cc: ControllerComponents,
         )
     }
 
-  def callback: Action[AnyContent] = Action.async { request =>
+  private def createUser(teamId: String, userId: String): ResultCont[User] = {
+    val mail = mailGenerator.generate()
+    val user = User(teamId, userId, mail)
+    logger.info(s"Creating new user: $user")
+    ResultCont.fromFuture(userRepository.store(user)).map(_ => user)
+  }
+
+  def signIn: Action[AnyContent] = Action.async { request =>
     (for {
       code <- getCode(request)
-      json <- getAccessJson(code)
+      json <- getAccessJson(code, slackConfig.signInRedirectUri)
       _ <- checkOk(json)
+      userId = (json \ "authed_user" \ "id").as[String]
+      teamId = (json \ "team" \ "id").as[String]
+      user <- createUser(teamId, userId)
     } yield {
-      val userId = (json \ "authed_user" \ "id").as[String]
-      // (json \ "authed_user" \ "access_token").as[String]
-      val teamId = (json \ "team" \ "id").as[String]
-      //                val user = User(teamId, userId)
-      //                Ok(s"${resp.status} ${resp.body}").withNewSession
-      //                  .withSession("teamId" -> teamId, "userId" -> userId)
       Redirect(routes.HomeController.index()).withNewSession
-        .withSession("teamId" -> teamId, "userId" -> userId)
+        .withSession("teamId" -> user.teamId, "userId" -> user.userId)
     }).run_
+  }
+
+  def add: Action[AnyContent] = Action.async { request =>
+    (for {
+      code <- getCode(request)
+      json <- getAccessJson(code, slackConfig.addRedirectUri)
+      _ <- checkOk(json)
+      teamId = (json \ "team" \ "id").as[String]
+      teamName = (json \ "team" \ "name").as[String]
+      botAccessToken = (json \ "access_token").as[String]
+      scope = (json \ "scope").as[String]
+      botUserId = (json \ "bot_user_id").as[String]
+      teamToken = TeamToken(teamId, teamName, scope, botUserId, botAccessToken)
+      _ = logger.info(
+        s"creating TeamToken: $teamId $teamName $scope $botUserId"
+      )
+      _ <- ResultCont.fromFuture(teamTokenRepository.store(teamToken))
+    } yield Redirect(routes.HomeController.index())).run_
   }
 }

@@ -2,5 +2,6 @@ package glsf
 
 case class SlackConfig(clientId: String,
                        clientSecret: String,
-                       redirectUri: String,
+                       signInRedirectUri: String,
+                       addRedirectUri: String,
                        accessUrl: String)

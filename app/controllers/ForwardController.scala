@@ -1,7 +1,7 @@
 package controllers
 
 import com.typesafe.scalalogging.LazyLogging
-import glsf.{User, UserRepository}
+import glsf.{TeamTokenRepository, User, UserRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.Files
 import play.api.mvc.{
@@ -18,6 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ForwardController @Inject()(cc: ControllerComponents,
                                   userRepository: UserRepository,
+                                  teamTokenRepository: TeamTokenRepository,
                                   implicit val ec: ExecutionContext)
     extends AbstractController(cc)
     with LazyLogging {

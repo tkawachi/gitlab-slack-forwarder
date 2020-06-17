@@ -1,17 +1,27 @@
-@(maybeUser: Option[glsf.User], clientId: String, callback: String)
+@(maybeUser: Option[glsf.User], maybeTeamToken: Option[glsf.TeamToken], clientId: String, signInCallback: String, addCallback: String)
 
 @main("GitLab Slack forwarder") {
 <h1>GitLab Slack forwarder</h1>
 
 @maybeUser match {
 case Some(user) => {
-    Please set <code>@{user.mail}</code> as GitLab notification address.
+    @maybeTeamToken match {
+        case None => {
+            <div>
+            You have not yet added a Gmail Slack forwarder to your workspace. You can add it to your workspace via the Add to Slack button.
+            </div>
+            <a href="https://slack.com/oauth/v2/authorize?scope=chat:write&client_id=@clientId&team=@{user.teamId}&redirect_uri=@addCallback"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@@2x.png 2x" /></a>
+        }
+        case Some(teamToken) => {
+            Please set <code>@{user.mail}</code> as GitLab notification address.
+        }
+    }
     <div>
         <a href="@{routes.LogoutController.logout}">Logout</a>
     </div>
 }
 case None => {
-<a href="https://slack.com/oauth/v2/authorize?user_scope=identity.basic&client_id=@clientId&redirect_uri=@callback"><img
+<a href="https://slack.com/oauth/v2/authorize?user_scope=identity.basic&client_id=@clientId&redirect_uri=@signInCallback"><img
         alt="Sign in with Slack" height="40" width="172"
         src="https://platform.slack-edge.com/img/sign_in_with_slack.png"
         srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@@2x.png 2x"/></a>
