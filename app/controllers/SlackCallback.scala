@@ -89,16 +89,33 @@ class SlackCallback @Inject()(cc: ControllerComponents,
         )
     }
 
+  private val createMailMaxRetry = 20
+
+  private def createMail(retry: Int = 0): ResultCont[String] = {
+    val m = mailGenerator.generate()
+    ResultCont.fromFuture(userRepository.findBy(m)).flatMap {
+      case Some(_) =>
+        if (retry > createMailMaxRetry) {
+          logger.error("Failed to create unique mail")
+          ResultCont.result(InternalServerError)
+        } else {
+          createMail(retry + 1)
+        }
+      case None => ResultCont.pure(m)
+    }
+  }
+
   private def getOrCreateUser(teamId: String,
                               userId: String): ResultCont[User] = {
     ResultCont.fromFuture(userRepository.findBy(teamId, userId)).flatMap {
       case Some(user) =>
         ResultCont.pure(user)
       case None =>
-        val mail = mailGenerator.generate()
-        val user = User(teamId, userId, mail)
-        logger.info(s"Creating new user: $user")
-        ResultCont.fromFuture(userRepository.store(user)).map(_ => user)
+        createMail().flatMap { mail =>
+          val user = User(teamId, userId, mail)
+          logger.info(s"Creating new user: $user")
+          ResultCont.fromFuture(userRepository.store(user)).map(_ => user)
+        }
     }
   }
 
