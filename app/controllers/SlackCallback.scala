@@ -1,14 +1,7 @@
 package controllers
 
 import com.typesafe.scalalogging.LazyLogging
-import glsf.{
-  MailGenerator,
-  SlackConfig,
-  TeamToken,
-  TeamTokenRepository,
-  User,
-  UserRepository
-}
+import glsf._
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -96,11 +89,17 @@ class SlackCallback @Inject()(cc: ControllerComponents,
         )
     }
 
-  private def createUser(teamId: String, userId: String): ResultCont[User] = {
-    val mail = mailGenerator.generate()
-    val user = User(teamId, userId, mail)
-    logger.info(s"Creating new user: $user")
-    ResultCont.fromFuture(userRepository.store(user)).map(_ => user)
+  private def getOrCreateUser(teamId: String,
+                              userId: String): ResultCont[User] = {
+    ResultCont.fromFuture(userRepository.findBy(teamId, userId)).flatMap {
+      case Some(user) =>
+        ResultCont.pure(user)
+      case None =>
+        val mail = mailGenerator.generate()
+        val user = User(teamId, userId, mail)
+        logger.info(s"Creating new user: $user")
+        ResultCont.fromFuture(userRepository.store(user)).map(_ => user)
+    }
   }
 
   def signIn: Action[AnyContent] = Action.async { request =>
@@ -110,7 +109,7 @@ class SlackCallback @Inject()(cc: ControllerComponents,
       _ <- checkOk(json)
       userId = (json \ "authed_user" \ "id").as[String]
       teamId = (json \ "team" \ "id").as[String]
-      user <- createUser(teamId, userId)
+      user <- getOrCreateUser(teamId, userId)
     } yield {
       Redirect(routes.HomeController.index()).withNewSession
         .withSession("teamId" -> user.teamId, "userId" -> user.userId)
@@ -128,9 +127,7 @@ class SlackCallback @Inject()(cc: ControllerComponents,
       scope = (json \ "scope").as[String]
       botUserId = (json \ "bot_user_id").as[String]
       teamToken = TeamToken(teamId, teamName, scope, botUserId, botAccessToken)
-      _ = logger.info(
-        s"creating TeamToken: $teamId $teamName $scope $botUserId"
-      )
+      _ = logger.info(s"Storing TeamToken: $teamId $teamName $scope $botUserId")
       _ <- ResultCont.fromFuture(teamTokenRepository.store(teamToken))
     } yield Redirect(routes.HomeController.index())).run_
   }

@@ -1,3 +1,3 @@
 package glsf
 
-case class AppConfig(baseUrl: String, mailDomain: String)
+case class AppConfig(baseUrl: String, mailDomain: String, gcpProjectId: String)
