@@ -44,7 +44,7 @@ class FirestoreTeamTokenRepository @Inject()(
   }
 
   override def findBy(teamId: String): Future[Option[TeamToken]] = Future {
-    val snapshot = collection.document("teamId").get().get()
+    val snapshot = collection.document(teamId).get().get()
     if (snapshot.exists()) {
       mapToTeamToken(snapshot.getData)
     } else {
