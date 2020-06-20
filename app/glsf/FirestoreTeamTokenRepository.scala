@@ -1,7 +1,8 @@
 package glsf
-import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.{FieldValue, Firestore}
 import javax.inject.{Inject, Named, Singleton}
 import java.{util => ju}
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 
@@ -12,13 +13,14 @@ class FirestoreTeamTokenRepository @Inject()(
 ) extends TeamTokenRepository {
   private val collection = firestore.collection("teams")
 
-  private def teamTokenToMap(teamToken: TeamToken): ju.Map[String, String] = {
+  private def teamTokenToMap(teamToken: TeamToken): ju.Map[String, AnyRef] = {
     Map(
       "teamId" -> teamToken.teamId,
       "teamName" -> teamToken.teamName,
       "scope" -> teamToken.scope,
       "botUserId" -> teamToken.botUserId,
-      "botAccessToken" -> teamToken.botAccessToken
+      "botAccessToken" -> teamToken.botAccessToken,
+      "timestamp" -> FieldValue.serverTimestamp()
     ).asJava
   }
 

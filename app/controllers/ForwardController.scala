@@ -2,15 +2,13 @@ package controllers
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder
 import com.typesafe.scalalogging.LazyLogging
 import glsf.{TeamTokenRepository, User, UserRepository}
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.Files
 import play.api.mvc.{
   AbstractController,
   Action,
-  AnyContent,
   ControllerComponents,
   MultipartFormData
 }
@@ -22,7 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class ForwardController @Inject()(cc: ControllerComponents,
                                   userRepository: UserRepository,
                                   teamTokenRepository: TeamTokenRepository,
-                                  implicit val ec: ExecutionContext)
+                                  implicit val ec: ExecutionContext,
+                                  @Named("io") ioec: ExecutionContext)
     extends AbstractController(cc)
     with LazyLogging {
 
@@ -44,7 +43,7 @@ class ForwardController @Inject()(cc: ControllerComponents,
         NotFound
       }
       .flatMap { teamToken =>
-        ResultCont.pure {
+        ResultCont.fromFuture(Future {
           logger.info(s"Send messag to Slack: $user $subject $text")
           val m = slack.methods(teamToken.botAccessToken)
           val message = ChatPostMessageRequest
@@ -52,11 +51,11 @@ class ForwardController @Inject()(cc: ControllerComponents,
             .channel(user.userId)
             .text(subject + "\n" + text)
             .build()
-          val resp = m.chatPostMessage(message) // TODO change ExecutionContext
+          val resp = m.chatPostMessage(message)
           if (!resp.isOk) {
             logger.error(resp.toString)
           }
-        }
+        }(ioec))
       }
 
   def post: Action[MultipartFormData[Files.TemporaryFile]] =

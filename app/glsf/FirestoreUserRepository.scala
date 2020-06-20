@@ -3,7 +3,7 @@ package glsf
 import java.{util => ju}
 
 import com.google.api.core.ApiFuture
-import com.google.cloud.firestore.{Firestore, QuerySnapshot}
+import com.google.cloud.firestore.{FieldValue, Firestore, QuerySnapshot}
 import com.typesafe.scalalogging.LazyLogging
 import javax.inject.{Inject, Named, Singleton}
 
@@ -24,8 +24,13 @@ class FirestoreUserRepository @Inject()(
   private def documentId(teamId: String, userId: String): String =
     s"$teamId-$userId"
 
-  private def userToMap(user: User): ju.Map[String, String] =
-    Map("teamId" -> user.teamId, "userId" -> user.userId, "mail" -> user.mail).asJava
+  private def userToMap(user: User): ju.Map[String, AnyRef] =
+    Map(
+      "teamId" -> user.teamId,
+      "userId" -> user.userId,
+      "mail" -> user.mail,
+      "timestamp" -> FieldValue.serverTimestamp()
+    ).asJava
 
   private def mapToUser(map: ju.Map[String, AnyRef]): Option[User] = {
     val m = map.asScala
