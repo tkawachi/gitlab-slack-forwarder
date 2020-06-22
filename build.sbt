@@ -16,6 +16,7 @@ libraryDependencies += "com.slack.api" % "slack-api-client" % "1.0.10"
 libraryDependencies += "com.google.firebase" % "firebase-admin" % "6.11.0"
 //libraryDependencies += "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1"
 
+dockerBaseImage := "openjdk:11.0-slim"
 dockerRepository := Some("us.gcr.io/gitlabslackforwarder")
 
 // Adds additional packages into Twirl
