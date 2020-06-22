@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import glsf.{TeamTokenRepository, User, UserRepository}
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.Files
+import play.api.libs.json.Json
 import play.api.mvc.{
   AbstractController,
   Action,
@@ -58,12 +59,29 @@ class ForwardController @Inject()(cc: ControllerComponents,
         }(ioec))
       }
 
+  def parseEnvelopeTo(
+    data: Map[String, Seq[String]]
+  ): ResultCont[Seq[String]] = {
+    for {
+      envelopes <- ResultCont.fromOption(data.get("envelope")) {
+        logger.info(s"envelope not found: $data")
+        BadRequest("envelope not found")
+      }
+      envelope <- ResultCont.fromOption(envelopes.headOption) {
+        logger.info(s"envelope is empty: $data")
+        BadRequest("envelope is empty")
+      }
+      tos <- ResultCont.pure((Json.parse(envelope) \ "to").as[Seq[String]])
+    } yield tos
+  }
+
   def post: Action[MultipartFormData[Files.TemporaryFile]] =
     Action.async(cc.parsers.multipartFormData) { implicit request =>
       // ref. https://sendgrid.com/docs/for-developers/parsing-email/setting-up-the-inbound-parse-webhook/
       val data = request.body.dataParts
       (for {
-        user <- findUser(data("to").head)
+        tos <- parseEnvelopeTo(data)
+        user <- findUser(tos.head) // TODO
         _ <- notifySlack(user, data("subject").head, data("text").head)
       } yield Ok).run_
     }
