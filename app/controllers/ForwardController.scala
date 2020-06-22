@@ -3,7 +3,7 @@ package controllers
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.typesafe.scalalogging.LazyLogging
-import glsf.{TeamTokenRepository, User, UserRepository}
+import glsf.{DebugDataSaver, TeamTokenRepository, User, UserRepository}
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.Files
 import play.api.libs.json.Json
@@ -21,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ForwardController @Inject()(cc: ControllerComponents,
                                   userRepository: UserRepository,
                                   teamTokenRepository: TeamTokenRepository,
+                                  debugDataSaver: DebugDataSaver,
                                   implicit val ec: ExecutionContext,
                                   @Named("io") ioec: ExecutionContext)
     extends AbstractController(cc)
@@ -80,6 +81,9 @@ class ForwardController @Inject()(cc: ControllerComponents,
       // ref. https://sendgrid.com/docs/for-developers/parsing-email/setting-up-the-inbound-parse-webhook/
       val data = request.body.dataParts
       (for {
+        _ <- ResultCont.fromFuture(
+          debugDataSaver.save(Map("mail" -> Json.toJson(data).toString()))
+        )
         tos <- parseEnvelopeTo(data)
         user <- findUser(tos.head) // TODO
         _ <- notifySlack(user, data("subject").head, data("text").head)

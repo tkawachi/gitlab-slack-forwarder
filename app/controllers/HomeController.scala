@@ -1,6 +1,6 @@
 package controllers
 
-import glsf.{AppConfig, SlackConfig, TeamToken, TeamTokenRepository, User}
+import glsf.{SlackConfig, TeamToken, TeamTokenRepository}
 import javax.inject._
 import play.api.mvc._
 import util.ResultCont

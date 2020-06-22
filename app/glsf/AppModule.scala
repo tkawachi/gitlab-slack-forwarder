@@ -22,6 +22,7 @@ class AppModule extends AbstractModule with LazyLogging {
     bind(classOf[UserRepository]).to(classOf[FirestoreUserRepository])
 //    bind(classOf[TeamTokenRepository]).to(classOf[MockTeamTokenRepository])
     bind(classOf[TeamTokenRepository]).to(classOf[FirestoreTeamTokenRepository])
+    bind(classOf[DebugDataSaver]).to(classOf[FirestoreDebugDataSaver])
   }
 
   @Provides
