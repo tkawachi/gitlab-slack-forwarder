@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/foo/bar/-/issues/1234|Re: Sample subject (#1234)>\nIssue was closed by John Doe via merge request <https://example.com/foo/bar/-/merge_requests/1234|!1234>"
+      }
+    }
+  ]
+}
