@@ -1,0 +1,32 @@
+{
+  "subject": [
+    "Re: Sample subject (!1234)"
+  ],
+  "text": [
+    "\r\n\r\n\r\nJohn Doe commented on a discussion on path/to/src/Hello.java: https://example.com/foo/bar/-/merge_requests/1234#note_765432\r\n\r\n>    line1\r\n>      line2\r\n>        line3\r\n> line4\r\n> line5\r\n> line6\r\n> -line7\r\n> -line8\r\n> +line9\r\n> +line10\r\n> +line11\r\n> +line12\r\n> +line13\r\n> +line14\r\n\r\ncomment :pray:\r\n\r\n-- \r\nView it on GitLab: https://example.com/foo/bar/-/merge_requests/1234#note_765432\r\nYou're receiving this email because of your account on example.com.\r\n\r\n\r\n"
+  ],
+  "to": [
+    "aaaaa@example.com"
+  ],
+  "SPF": [
+    "pass"
+  ],
+  "from": [
+    "John Doe <john@example.com>"
+  ],
+  "envelope": [
+    "{\"to\":[\"aaaaa@example.com\"],\"from\":\"bbbbb@example.com\"}"
+  ],
+  "attachments": [
+    "0"
+  ],
+  "charsets": [
+    "{\"to\":\"UTF-8\",\"html\":\"UTF-8\",\"subject\":\"UTF-8\",\"from\":\"UTF-8\",\"text\":\"UTF-8\"}"
+  ],
+  "headers": [
+    ""
+  ],
+  "html": [
+    ""
+  ]
+}
