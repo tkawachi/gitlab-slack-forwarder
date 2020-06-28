@@ -2,7 +2,9 @@ package controllers
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.model.block.LayoutBlock
 import com.typesafe.scalalogging.LazyLogging
+import glsf.format.{Message, MessageFormatter}
 import glsf.{DebugDataSaver, TeamTokenRepository, User, UserRepository}
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.Files
@@ -16,12 +18,14 @@ import play.api.mvc.{
 import util.ResultCont
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
 
 @Singleton
 class ForwardController @Inject()(cc: ControllerComponents,
                                   userRepository: UserRepository,
                                   teamTokenRepository: TeamTokenRepository,
                                   debugDataSaver: DebugDataSaver,
+                                  messageFormatter: MessageFormatter,
                                   implicit val ec: ExecutionContext,
                                   @Named("io") ioec: ExecutionContext)
     extends AbstractController(cc)
@@ -36,8 +40,7 @@ class ForwardController @Inject()(cc: ControllerComponents,
     }
 
   private def notifySlack(user: User,
-                          subject: String,
-                          text: String): ResultCont[Unit] =
+                          blocks: Seq[LayoutBlock]): ResultCont[Unit] =
     ResultCont
       .fromFuture(teamTokenRepository.findBy(user.teamId))
       .getOrResult {
@@ -46,12 +49,12 @@ class ForwardController @Inject()(cc: ControllerComponents,
       }
       .flatMap { teamToken =>
         ResultCont.fromFuture(Future {
-          logger.info(s"Send messag to Slack: $user $subject $text")
+          logger.info(s"Send messag to Slack: $user")
           val m = slack.methods(teamToken.botAccessToken)
           val message = ChatPostMessageRequest
             .builder()
             .channel(user.userId)
-            .text(subject + "\n" + text)
+            .blocks(blocks.asJava)
             .build()
           val resp = m.chatPostMessage(message)
           if (!resp.isOk) {
@@ -76,17 +79,32 @@ class ForwardController @Inject()(cc: ControllerComponents,
     } yield tos
   }
 
+  def formatMessage(message: Message): ResultCont[Seq[LayoutBlock]] = {
+    messageFormatter.format(message) match {
+      case Some(blocks) => ResultCont.pure(blocks)
+      case None =>
+        ResultCont
+          .fromFuture(
+            // Store unknown format message
+            debugDataSaver
+              .save(Map("mail" -> Json.toJson(message.dataParts).toString()))
+          )
+          .map { _ =>
+            messageFormatter.defaultFallback(message)
+          }
+    }
+  }
+
   def post: Action[MultipartFormData[Files.TemporaryFile]] =
     Action.async(cc.parsers.multipartFormData) { implicit request =>
       // ref. https://sendgrid.com/docs/for-developers/parsing-email/setting-up-the-inbound-parse-webhook/
       val data = request.body.dataParts
+      val message = Message(data)
       (for {
-        _ <- ResultCont.fromFuture(
-          debugDataSaver.save(Map("mail" -> Json.toJson(data).toString()))
-        )
         tos <- parseEnvelopeTo(data)
         user <- findUser(tos.head) // TODO
-        _ <- notifySlack(user, data("subject").head, data("text").head)
+        blocks <- formatMessage(message)
+        _ <- notifySlack(user, blocks)
       } yield Ok).run_
     }
 }

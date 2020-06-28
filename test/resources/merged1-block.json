@@ -4,7 +4,7 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "<https://example.com/foo/bar/-/merge_requests/1234|Re: Sample subject (!1234)>\nMerge Request !1234 was merged"
+        "text": ":sparkles: <https://example.com/foo/bar/-/merge_requests/1234|Re: Sample subject (!1234)>\nMerge Request !1234 was merged"
       }
     }
   ]
