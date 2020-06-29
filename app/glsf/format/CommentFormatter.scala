@@ -16,7 +16,11 @@ private[format] class CommentFormatter @Inject()(footerParser: FooterParser)
       m <- pat.findPrefixMatchOf(bodyFooter.body)
     } yield {
       val header = m.group(1).strip()
-      val rest = m.group(2).strip()
+      val rest =
+        m.group(2)
+          .replaceAll("(?m)^&gt;.*$", "")
+          .replaceAll("\n+", "\n")
+          .strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
       Seq(
         SectionBlock

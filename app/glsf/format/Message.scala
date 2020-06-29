@@ -9,8 +9,7 @@ case class Message(dataParts: Map[String, Seq[String]]) {
         _.replaceAll("\r\n", "\n")
           .replaceAll("&", "&amp;")
           .replaceAll("<", "&lt;")
-          // Keep > at start of line which is interpreted as quote
-          .replaceAll("([^\n])>", "$1&gt;")
+          .replaceAll(">", "&gt;")
       )
 
   lazy val maybeSubject: Option[String] = maybeSingle("subject")
