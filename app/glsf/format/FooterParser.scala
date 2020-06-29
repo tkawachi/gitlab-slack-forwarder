@@ -16,5 +16,5 @@ private[format] class FooterParser {
 
 object FooterParser {
   private val footerPat =
-    """(?s)^(.+)-- \nView it on GitLab: (http[^\s]+)\nYou're receiving this email because of your account on ([^\s]+)\.""".r
+    """(?s)^(.+)-- \nView it on GitLab: (http[^\s]+)\nYou're receiving this email because""".r
 }

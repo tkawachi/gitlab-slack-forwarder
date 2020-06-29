@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":speech_balloon: <https://example.com/foo/bar/-/merge_requests/1234|Re: bar | MR title (!1234)>\nJohn Doe:\ncomment1\ncomment2"
+      }
+    }
+  ]
+}

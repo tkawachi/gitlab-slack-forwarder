@@ -29,7 +29,7 @@ private[format] class CommentFormatter @Inject()(footerParser: FooterParser)
           .text(
             MarkdownTextObject
               .builder()
-              .text(s":bookmark_tabs: $linkedSubject\n$who:\n$rest")
+              .text(s":speech_balloon: $linkedSubject\n$who:\n$rest")
               .build()
           )
           .build()

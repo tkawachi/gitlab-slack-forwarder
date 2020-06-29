@@ -1,12 +1,13 @@
 package glsf.format
 
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import com.slack.api.model.block.composition.MarkdownTextObject
+import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
-class ConflictFormatter @Inject()(footerParser: FooterParser)
+private[format] class NewIssueFormatter @Inject()(footerParser: FooterParser)
     extends MaybeFormatter {
-  private val pat = """^.+can no longer be merged due to conflict.""".r
+  private val pat =
+    """^(.+ created an issue): http""".r
 
   override def format(message: Message): Option[Seq[LayoutBlock]] = {
     for {
@@ -15,6 +16,7 @@ class ConflictFormatter @Inject()(footerParser: FooterParser)
       bodyFooter <- footerParser.parse(text)
       m <- pat.findPrefixMatchOf(bodyFooter.body)
     } yield {
+      val line = m.group(1).strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
       Seq(
         SectionBlock
@@ -22,12 +24,11 @@ class ConflictFormatter @Inject()(footerParser: FooterParser)
           .text(
             MarkdownTextObject
               .builder()
-              .text(s":skull: $linkedSubject\nConflicted.")
+              .text(s":memo: $linkedSubject\n$line")
               .build()
           )
           .build()
       )
     }
   }
-
 }

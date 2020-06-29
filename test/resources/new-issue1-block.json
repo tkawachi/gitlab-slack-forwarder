@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":memo: <https://example.com/foo/bar/-/issues/8|proj | Issue title (#8)>\nJohn Doe created an issue"
+      }
+    }
+  ]
+}

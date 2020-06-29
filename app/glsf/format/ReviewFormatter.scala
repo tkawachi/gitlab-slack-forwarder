@@ -1,12 +1,14 @@
 package glsf.format
 
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import com.slack.api.model.block.composition.MarkdownTextObject
+import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
-class ConflictFormatter @Inject()(footerParser: FooterParser)
+private[format] class ReviewFormatter @Inject()(footerParser: FooterParser)
     extends MaybeFormatter {
-  private val pat = """^.+can no longer be merged due to conflict.""".r
+
+  private val pat =
+    """^Merge request http.+ was reviewed by (.+)(?s)(.+)""".r
 
   override def format(message: Message): Option[Seq[LayoutBlock]] = {
     for {
@@ -15,6 +17,14 @@ class ConflictFormatter @Inject()(footerParser: FooterParser)
       bodyFooter <- footerParser.parse(text)
       m <- pat.findPrefixMatchOf(bodyFooter.body)
     } yield {
+      val who = m.group(1).strip()
+      val rest =
+        m.group(2)
+          .replaceAll("(?m)^&gt;.*$", "")
+          .replaceAll("\n+", "\n")
+          .replaceAll("(?m)^--\n", "")
+          .replaceAll("(?m)^.+ started a new discussion on .+$", "")
+          .strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
       Seq(
         SectionBlock
@@ -22,12 +32,11 @@ class ConflictFormatter @Inject()(footerParser: FooterParser)
           .text(
             MarkdownTextObject
               .builder()
-              .text(s":skull: $linkedSubject\nConflicted.")
+              .text(s":speech_balloon: $linkedSubject\n$who:\n$rest")
               .build()
           )
           .build()
       )
     }
   }
-
 }

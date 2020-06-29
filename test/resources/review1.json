@@ -1,0 +1,32 @@
+{
+  "subject": [
+    "Re: bar | MR title (!1234)"
+  ],
+  "text": [
+    "\r\n\r\nMerge request https://example.com/foo/bar/-/merge_requests/1234 was reviewed by John Doe\r\n\r\n--\r\n  \r\nJohn Doe started a new discussion on path/to/Target.java: https://example.com/foo/bar/-/merge_requests/1234#note_123456\r\n\r\n> -        line1\r\n> -        line2\r\n> +      line3\r\n\r\ncomment1\r\n\r\ncomment2\r\n\r\n\r\n-- \r\nView it on GitLab: https://example.com/foo/bar/-/merge_requests/1234\r\nYou're receiving this email because of your account on example.com.\r\n\r\n\r\n"
+  ],
+  "to": [
+    "aaaaa@example.com"
+  ],
+  "SPF": [
+    "pass"
+  ],
+  "from": [
+    "John Doe <john@example.com>"
+  ],
+  "envelope": [
+    "{\"to\":[\"aaaaa@example.com\"],\"from\":\"bbbbb@example.com\"}"
+  ],
+  "attachments": [
+    "0"
+  ],
+  "charsets": [
+    "{\"to\":\"UTF-8\",\"html\":\"UTF-8\",\"subject\":\"UTF-8\",\"from\":\"UTF-8\",\"text\":\"UTF-8\"}"
+  ],
+  "headers": [
+    ""
+  ],
+  "html": [
+    ""
+  ]
+}

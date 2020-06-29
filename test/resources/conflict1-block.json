@@ -4,7 +4,7 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": ":boom: <https://example.com/foo/bar/-/merge_requests/123|Re: proj | Sample subject>\nConflicted."
+        "text": ":skull: <https://example.com/foo/bar/-/merge_requests/123|Re: proj | Sample subject>\nConflicted."
       }
     }
   ]

@@ -1,0 +1,32 @@
+{
+  "subject": [
+    "proj | Issue title (#8)"
+  ],
+  "text": [
+    "\r\n\r\nJohn Doe created an issue: https://example.com/foo/bar/-/issues/8\r\n\r\nAssignee: John Doe\r\n\r\nThe following discussion from !7 should be addressed:\r\n\r\n- [ ] @foo started a [discussion](https://example.com/foo/bar/-/merge_requests/7#note_12345): \r\n\r\n    > nits  \r\n    > Some comment\r\n\r\n-- \r\nView it on GitLab: https://example.com/foo/bar/-/issues/8\r\nYou're receiving this email because you have been mentioned on example.com.\r\n\r\n\r\n"
+  ],
+  "to": [
+    "aaaaa@example.com"
+  ],
+  "SPF": [
+    "pass"
+  ],
+  "from": [
+    "John Doe <john@example.com>"
+  ],
+  "envelope": [
+    "{\"to\":[\"aaaaa@example.com\"],\"from\":\"bbbbb@example.com\"}"
+  ],
+  "attachments": [
+    "0"
+  ],
+  "charsets": [
+    "{\"to\":\"UTF-8\",\"html\":\"UTF-8\",\"subject\":\"UTF-8\",\"from\":\"UTF-8\",\"text\":\"UTF-8\"}"
+  ],
+  "headers": [
+    ""
+  ],
+  "html": [
+    ""
+  ]
+}
