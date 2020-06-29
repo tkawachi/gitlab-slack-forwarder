@@ -6,14 +6,18 @@ class FormatterModule extends AbstractModule {
   override def configure(): Unit = {}
 
   @Provides
-  def formatters(commentFormatter: CommentFormatter,
+  def formatters(approveFormatter: ApproveFormatter,
+                 commentFormatter: CommentFormatter,
                  issueClosedFormatter: IssueClosedViaMRFormatter,
                  mergedFormatter: MergedFormatter,
-                 pushedFormatter: PushedFormatter): Seq[MaybeFormatter] =
+                 pushedFormatter: PushedFormatter,
+                 conflictFormatter: ConflictFormatter): Seq[MaybeFormatter] =
     Seq(
+      approveFormatter,
       commentFormatter,
       issueClosedFormatter,
       mergedFormatter,
-      pushedFormatter
+      pushedFormatter,
+      conflictFormatter
     )
 }

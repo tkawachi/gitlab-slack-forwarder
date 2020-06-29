@@ -4,7 +4,7 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": ":bookmark_tabs: <https://example.com/foo/bar/-/merge_requests/1234#note_765432|Re: Sample subject (!1234)>\nJohn Doe commented on a discussion on path/to/src/Hello.java:\ncomment :pray:"
+        "text": ":bookmark_tabs: <https://example.com/foo/bar/-/merge_requests/1234#note_765432|Re: Sample subject (!1234)>\nJohn Doe:\ncomment :pray:"
       }
     }
   ]

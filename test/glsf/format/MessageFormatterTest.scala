@@ -8,7 +8,15 @@ class MessageFormatterTest extends FunSuite {
   private val injector = Guice.createInjector(new FormatterModule)
 
   private val testCases =
-    Seq("comment1", "issue-closed-via-mr1", "merged1", "pushed1")
+    Seq(
+      "approve1",
+      "comment1",
+      "comment2",
+      "issue-closed-via-mr1",
+      "merged1",
+      "pushed1",
+      "conflict1"
+    )
 
   testCases.foreach { tc =>
     test(s"format $tc") {

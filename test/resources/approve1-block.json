@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":+1: <https://example.com/foo/bar/-/merge_requests/1234|Re: proj | Sample subject (!1234)>\nApproved by Foo Bar"
+      }
+    }
+  ]
+}
