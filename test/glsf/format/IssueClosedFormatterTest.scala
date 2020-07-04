@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 class IssueClosedFormatterTest extends FunSuite {
   private val injector = Guice.createInjector(new FormatterModule)
 
-  Seq("issue-closed1").foreach { name =>
+  Seq("issue-closed1", "mr-closed1").foreach { name =>
     test(s"format $name") {
       new FormatterGoldenTest {
         override def formatter: MaybeFormatter =

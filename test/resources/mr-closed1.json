@@ -1,0 +1,32 @@
+{
+  "subject": [
+    "Re: bar | WIP: Sample subject (!1234)"
+  ],
+  "text": [
+    "\r\n\r\nMerge Request !1234 was closed by John Doe\r\nMerge Request url: https://example.com/foo/bar/-/merge_requests/1234\r\nBranches: sample-branch to master\r\nAuthor: John Doe\r\nAssignee: John Doe\r\n\r\n-- \r\nView it on GitLab: https://example.com/foo/bar/-/merge_requests/1234\r\nYou're receiving this email because of your account on example.com.\r\n\r\n\n"
+  ],
+  "to": [
+    "aaaaa@example.com"
+  ],
+  "SPF": [
+    "pass"
+  ],
+  "from": [
+    "John Doe <john@example.com>"
+  ],
+  "envelope": [
+    "{\"to\":[\"aaaaa@example.com\"],\"from\":\"bbbbb@example.com\"}"
+  ],
+  "attachments": [
+    "0"
+  ],
+  "charsets": [
+    "{\"to\":\"UTF-8\",\"html\":\"UTF-8\",\"subject\":\"UTF-8\",\"from\":\"UTF-8\",\"text\":\"UTF-8\"}"
+  ],
+  "headers": [
+    ""
+  ],
+  "html": [
+    ""
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":package: <https://example.com/foo/bar/-/merge_requests/1234|Re: bar | WIP: Sample subject (!1234)>\nMerge Request !1234 was closed by John Doe"
+      }
+    }
+  ]
+}

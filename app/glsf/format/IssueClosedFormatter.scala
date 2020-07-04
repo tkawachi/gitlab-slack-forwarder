@@ -7,7 +7,7 @@ import javax.inject.Inject
 private[format] class IssueClosedFormatter @Inject()(footerParser: FooterParser)
     extends MaybeFormatter {
   private val pat =
-    """^(Issue was closed by .+)""".r
+    """^(.+ was closed by .+)""".r
 
   override def format(message: Message): Option[Seq[LayoutBlock]] = {
     for {

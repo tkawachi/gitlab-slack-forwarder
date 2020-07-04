@@ -16,6 +16,7 @@ class MessageFormatterTest extends FunSuite {
       "issue-closed1",
       "issue-closed-via-mr1",
       "merged1",
+      "mr-closed1",
       "new-issue1",
       "new-mr1",
       "pipeline-failed1",
