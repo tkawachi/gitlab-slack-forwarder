@@ -13,6 +13,7 @@ class MessageFormatterTest extends FunSuite {
       "assignee-changed1",
       "comment1",
       "comment2",
+      "issue-closed1",
       "issue-closed-via-mr1",
       "merged1",
       "new-issue1",

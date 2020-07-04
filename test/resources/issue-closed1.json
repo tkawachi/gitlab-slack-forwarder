@@ -1,0 +1,32 @@
+{
+  "subject": [
+    "Re: baz | Sample subject (#1234)"
+  ],
+  "text": [
+    "\n\nIssue was closed by John Doe \nIssue #1234: https://example.com/foo/bar/baz/-/issues/1234\n\n-- \nView it on GitLab: https://example.com/foo/bar/baz/-/issues/1234\nYou're receiving this email because of your account on example.com.\n\n\n"
+  ],
+  "to": [
+    "aaaaa@example.com"
+  ],
+  "SPF": [
+    "pass"
+  ],
+  "from": [
+    "John Doe <john@example.com>"
+  ],
+  "envelope": [
+    "{\"to\":[\"aaaaa@example.com\"],\"from\":\"bbbbb@example.com\"}"
+  ],
+  "attachments": [
+    "0"
+  ],
+  "charsets": [
+    "{\"to\":\"UTF-8\",\"html\":\"UTF-8\",\"subject\":\"UTF-8\",\"from\":\"UTF-8\",\"text\":\"UTF-8\"}"
+  ],
+  "headers": [
+    ""
+  ],
+  "html": [
+    ""
+  ]
+}
