@@ -4,7 +4,7 @@ import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import com.slack.api.model.block.composition.MarkdownTextObject
 import javax.inject.Inject
 
-class PushedFormatter @Inject()(footerParser: FooterParser)
+private[format] class PushedFormatter @Inject()(footerParser: FooterParser)
     extends MaybeFormatter {
   private val pat =
     """(?m)^(.+ pushed new commits to merge request ![0-9]+)$""".r

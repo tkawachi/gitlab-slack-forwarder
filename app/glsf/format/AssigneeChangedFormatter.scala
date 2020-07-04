@@ -4,8 +4,9 @@ import com.slack.api.model.block.composition.MarkdownTextObject
 import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
-class AssigneeChangedFormatter @Inject()(footerParser: FooterParser)
-    extends MaybeFormatter {
+private[format] class AssigneeChangedFormatter @Inject()(
+  footerParser: FooterParser
+) extends MaybeFormatter {
 
   private val pat = """(?m)^(Assignee changed .* to .*)$""".r
 

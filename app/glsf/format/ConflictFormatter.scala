@@ -4,7 +4,7 @@ import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import com.slack.api.model.block.composition.MarkdownTextObject
 import javax.inject.Inject
 
-class ConflictFormatter @Inject()(footerParser: FooterParser)
+private[format] class ConflictFormatter @Inject()(footerParser: FooterParser)
     extends MaybeFormatter {
   private val pat = """^.+can no longer be merged due to conflict.""".r
 
