@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":nerd_face: <https://example.com/foo/bar/-/merge_requests/1234|bar | Sample subject (!1234)>\nJohn Doe created a merge request\nAssignee: Smith"
+      }
+    }
+  ]
+}
