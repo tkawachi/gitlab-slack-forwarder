@@ -9,6 +9,7 @@ class MessageFormatterTest extends FunSuite {
 
   private val testCases =
     Seq(
+      "all-discussion-resolved1",
       "approve1",
       "assignee-changed1",
       "comment1",

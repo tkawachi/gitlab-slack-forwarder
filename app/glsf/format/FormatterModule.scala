@@ -8,7 +8,8 @@ class FormatterModule extends AbstractModule {
 
   @Singleton
   @Provides
-  def formatters(assigneeChangedFormatter: AssigneeChangedFormatter,
+  def formatters(allDiscussionResolvedFormatter: AllDiscussionResolvedFormatter,
+                 assigneeChangedFormatter: AssigneeChangedFormatter,
                  approveFormatter: ApproveFormatter,
                  commentFormatter: CommentFormatter,
                  issueClosedViaMRFormatter: IssueClosedViaMRFormatter,
@@ -21,6 +22,7 @@ class FormatterModule extends AbstractModule {
                  conflictFormatter: ConflictFormatter,
                  reviewFormatter: ReviewFormatter): Seq[MaybeFormatter] =
     Seq(
+      allDiscussionResolvedFormatter,
       assigneeChangedFormatter,
       approveFormatter,
       commentFormatter,
