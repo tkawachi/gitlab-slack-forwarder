@@ -9,7 +9,6 @@ import util.ResultCont
 import scala.concurrent.ExecutionContext
 
 class Authentication @Inject()(userRepository: UserRepository,
-                               mailGenerator: MailGenerator,
                                implicit val ec: ExecutionContext)
     extends LazyLogging {
   private def auth2(request: Request[_]): ResultCont[Option[(String, String)]] =
