@@ -18,7 +18,9 @@ private[format] trait FormatterGoldenTest extends Assertions {
       .as[Map[String, Seq[String]]]
 
   private def readBlocks(testCase: String): JsValue =
-    (Json.parse(Source.fromResource(s"$testCase-block.json").mkString) \ "blocks")
+    (Json.parse(
+      Source.fromResource(s"$testCase-block.json").mkString
+    ) \ "blocks")
       .as[JsValue]
 
   private def blocksJson(blocks: Seq[LayoutBlock]): JsValue = {

@@ -12,14 +12,15 @@ import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
 @Singleton
-class SlackCallback @Inject()(cc: ControllerComponents,
-                              ws: WSClient,
-                              slackConfig: SlackConfig,
-                              mailGenerator: MailGenerator,
-                              userRepository: UserRepository,
-                              teamTokenRepository: TeamTokenRepository,
-                              implicit val ec: ExecutionContext)
-    extends AbstractController(cc)
+class SlackCallback @Inject() (
+    cc: ControllerComponents,
+    ws: WSClient,
+    slackConfig: SlackConfig,
+    mailGenerator: MailGenerator,
+    userRepository: UserRepository,
+    teamTokenRepository: TeamTokenRepository,
+    implicit val ec: ExecutionContext
+) extends AbstractController(cc)
     with LazyLogging {
 
   private def getCode(request: Request[_]): ResultCont[String] =
@@ -30,8 +31,10 @@ class SlackCallback @Inject()(cc: ControllerComponents,
       )
     )
 
-  private def getAccessJson(code: String,
-                            redirectUri: String): ResultCont[JsValue] = {
+  private def getAccessJson(
+      code: String,
+      redirectUri: String
+  ): ResultCont[JsValue] = {
     ResultCont
       .fromFuture(
         ws.url(slackConfig.accessUrl)
@@ -105,8 +108,10 @@ class SlackCallback @Inject()(cc: ControllerComponents,
     }
   }
 
-  private def getOrCreateUser(teamId: String,
-                              userId: String): ResultCont[User] = {
+  private def getOrCreateUser(
+      teamId: String,
+      userId: String
+  ): ResultCont[User] = {
     ResultCont.fromFuture(userRepository.findBy(teamId, userId)).flatMap {
       case Some(user) =>
         ResultCont.pure(user)
@@ -119,33 +124,37 @@ class SlackCallback @Inject()(cc: ControllerComponents,
     }
   }
 
-  def signIn: Action[AnyContent] = Action.async { request =>
-    (for {
-      code <- getCode(request)
-      json <- getAccessJson(code, slackConfig.signInRedirectUri)
-      _ <- checkOk(json)
-      userId = (json \ "authed_user" \ "id").as[String]
-      teamId = (json \ "team" \ "id").as[String]
-      user <- getOrCreateUser(teamId, userId)
-    } yield {
-      Redirect(routes.HomeController.index()).withNewSession
-        .withSession("teamId" -> user.teamId, "userId" -> user.userId)
-    }).run_
-  }
+  def signIn: Action[AnyContent] =
+    Action.async { request =>
+      (for {
+        code <- getCode(request)
+        json <- getAccessJson(code, slackConfig.signInRedirectUri)
+        _ <- checkOk(json)
+        userId = (json \ "authed_user" \ "id").as[String]
+        teamId = (json \ "team" \ "id").as[String]
+        user <- getOrCreateUser(teamId, userId)
+      } yield {
+        Redirect(routes.HomeController.index()).withNewSession
+          .withSession("teamId" -> user.teamId, "userId" -> user.userId)
+      }).run_
+    }
 
-  def add: Action[AnyContent] = Action.async { request =>
-    (for {
-      code <- getCode(request)
-      json <- getAccessJson(code, slackConfig.addRedirectUri)
-      _ <- checkOk(json)
-      teamId = (json \ "team" \ "id").as[String]
-      teamName = (json \ "team" \ "name").as[String]
-      botAccessToken = (json \ "access_token").as[String]
-      scope = (json \ "scope").as[String]
-      botUserId = (json \ "bot_user_id").as[String]
-      teamToken = TeamToken(teamId, teamName, scope, botUserId, botAccessToken)
-      _ = logger.info(s"Storing TeamToken: $teamId $teamName $scope $botUserId")
-      _ <- ResultCont.fromFuture(teamTokenRepository.store(teamToken))
-    } yield Redirect(routes.HomeController.index())).run_
-  }
+  def add: Action[AnyContent] =
+    Action.async { request =>
+      (for {
+        code <- getCode(request)
+        json <- getAccessJson(code, slackConfig.addRedirectUri)
+        _ <- checkOk(json)
+        teamId = (json \ "team" \ "id").as[String]
+        teamName = (json \ "team" \ "name").as[String]
+        botAccessToken = (json \ "access_token").as[String]
+        scope = (json \ "scope").as[String]
+        botUserId = (json \ "bot_user_id").as[String]
+        teamToken =
+          TeamToken(teamId, teamName, scope, botUserId, botAccessToken)
+        _ =
+          logger.info(s"Storing TeamToken: $teamId $teamName $scope $botUserId")
+        _ <- ResultCont.fromFuture(teamTokenRepository.store(teamToken))
+      } yield Redirect(routes.HomeController.index())).run_
+    }
 }

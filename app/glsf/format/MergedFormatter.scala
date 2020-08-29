@@ -4,7 +4,7 @@ import com.slack.api.model.block.composition.MarkdownTextObject
 import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
-private[format] class MergedFormatter @Inject()(footerParser: FooterParser)
+private[format] class MergedFormatter @Inject() (footerParser: FooterParser)
     extends MaybeFormatter {
 
   private val pat = """(?m)^(Merge Request ![0-9]+ was merged)$""".r

@@ -11,8 +11,9 @@ class MockTeamTokenRepository extends TeamTokenRepository {
   override def findBy(teamId: String): Future[Option[TeamToken]] =
     Future.successful(tokens.find(t => t.teamId == teamId))
 
-  override def store(teamToken: TeamToken): Future[Unit] = Future.successful {
-    tokens.addOne(teamToken)
-    ()
-  }
+  override def store(teamToken: TeamToken): Future[Unit] =
+    Future.successful {
+      tokens.addOne(teamToken)
+      ()
+    }
 }

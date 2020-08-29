@@ -3,7 +3,7 @@ import com.slack.api.model.block.composition.MarkdownTextObject
 import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
-private[format] class CommentFormatter @Inject()(footerParser: FooterParser)
+private[format] class CommentFormatter @Inject() (footerParser: FooterParser)
     extends MaybeFormatter {
 
   private val pat =

@@ -12,12 +12,13 @@ import scala.concurrent.ExecutionContext
   * application's home page.
   */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents,
-                               slackConfig: SlackConfig,
-                               authentication: Authentication,
-                               teamTokenRepository: TeamTokenRepository,
-                               implicit val ec: ExecutionContext)
-    extends BaseController {
+class HomeController @Inject() (
+    val controllerComponents: ControllerComponents,
+    slackConfig: SlackConfig,
+    authentication: Authentication,
+    teamTokenRepository: TeamTokenRepository,
+    implicit val ec: ExecutionContext
+) extends BaseController {
 
   private def findTeamToken(teamId: String): ResultCont[Option[TeamToken]] =
     ResultCont.fromFuture(teamTokenRepository.findBy(teamId))
@@ -29,23 +30,22 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents,
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
-  def index(): Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] =>
+  def index(): Action[AnyContent] =
+    Action.async { implicit request: Request[AnyContent] =>
       (for {
         maybeUser <- authentication.auth(request)
         maybeTeamToken <- maybeUser.fold(
           ResultCont.pure(None: Option[TeamToken])
         )(u => findTeamToken(u.teamId))
-      } yield
-        Ok(
-          views.html
-            .index(
-              maybeUser,
-              maybeTeamToken,
-              slackConfig.clientId,
-              slackConfig.signInRedirectUri,
-              slackConfig.addRedirectUri
-            )
-        )).run_
-  }
+      } yield Ok(
+        views.html
+          .index(
+            maybeUser,
+            maybeTeamToken,
+            slackConfig.clientId,
+            slackConfig.signInRedirectUri,
+            slackConfig.addRedirectUri
+          )
+      )).run_
+    }
 }

@@ -62,12 +62,12 @@ class AppModule extends AbstractModule with LazyLogging {
   @Named("io")
   @Provides
   def ioExecutionContext(
-    applicationLifecycle: ApplicationLifecycle
+      applicationLifecycle: ApplicationLifecycle
   ): ExecutionContext = {
     logger.info("Initializing I/O execution context")
     val executors = Executors.newCachedThreadPool()
-    applicationLifecycle.addStopHook(
-      () => Future.successful(executors.shutdown())
+    applicationLifecycle.addStopHook(() =>
+      Future.successful(executors.shutdown())
     )
     ExecutionContext.fromExecutorService(executors)
   }

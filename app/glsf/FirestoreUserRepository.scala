@@ -11,9 +11,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 
 @Singleton
-class FirestoreUserRepository @Inject()(
-  firestore: Firestore,
-  @Named("io") implicit val ec: ExecutionContext
+class FirestoreUserRepository @Inject() (
+    firestore: Firestore,
+    @Named("io") implicit val ec: ExecutionContext
 ) extends UserRepository
     with LazyLogging {
   private lazy val collection = firestore.collection("users")
@@ -51,10 +51,11 @@ class FirestoreUserRepository @Inject()(
       }
     }
 
-  override def findBy(mail: String): Future[Option[User]] = Future {
-    val query = collection.whereEqualTo("mail", mail).get()
-    extractUser(query)
-  }
+  override def findBy(mail: String): Future[Option[User]] =
+    Future {
+      val query = collection.whereEqualTo("mail", mail).get()
+      extractUser(query)
+    }
 
   private def extractUser(query: ApiFuture[QuerySnapshot]): Option[User] = {
     val docs = query.get().getDocuments.asScala
@@ -68,8 +69,9 @@ class FirestoreUserRepository @Inject()(
     }
   }
 
-  override def store(user: User): Future[Unit] = Future {
-    val doc = collection.document(documentId(user))
-    doc.set(userToMap(user)).get()
-  }
+  override def store(user: User): Future[Unit] =
+    Future {
+      val doc = collection.document(documentId(user))
+      doc.set(userToMap(user)).get()
+    }
 }

@@ -8,19 +8,21 @@ class FormatterModule extends AbstractModule {
 
   @Singleton
   @Provides
-  def formatters(allDiscussionResolvedFormatter: AllDiscussionResolvedFormatter,
-                 assigneeChangedFormatter: AssigneeChangedFormatter,
-                 approveFormatter: ApproveFormatter,
-                 commentFormatter: CommentFormatter,
-                 issueClosedViaMRFormatter: IssueClosedViaMRFormatter,
-                 issueClosedFormatter: IssueClosedFormatter,
-                 mergedFormatter: MergedFormatter,
-                 newIssueFormatter: NewIssueFormatter,
-                 newMRFormatter: NewMRFormatter,
-                 pipelineFailedFormatter: PipelineFailedFormatter,
-                 pushedFormatter: PushedFormatter,
-                 conflictFormatter: ConflictFormatter,
-                 reviewFormatter: ReviewFormatter): Seq[MaybeFormatter] =
+  def formatters(
+      allDiscussionResolvedFormatter: AllDiscussionResolvedFormatter,
+      assigneeChangedFormatter: AssigneeChangedFormatter,
+      approveFormatter: ApproveFormatter,
+      commentFormatter: CommentFormatter,
+      issueClosedViaMRFormatter: IssueClosedViaMRFormatter,
+      issueClosedFormatter: IssueClosedFormatter,
+      mergedFormatter: MergedFormatter,
+      newIssueFormatter: NewIssueFormatter,
+      newMRFormatter: NewMRFormatter,
+      pipelineFailedFormatter: PipelineFailedFormatter,
+      pushedFormatter: PushedFormatter,
+      conflictFormatter: ConflictFormatter,
+      reviewFormatter: ReviewFormatter
+  ): Seq[MaybeFormatter] =
     Seq(
       allDiscussionResolvedFormatter,
       assigneeChangedFormatter,
