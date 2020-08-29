@@ -4,8 +4,9 @@ import com.slack.api.model.block.composition.MarkdownTextObject
 import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
-private[format] class IssueClosedFormatter @Inject()(footerParser: FooterParser)
-    extends MaybeFormatter {
+private[format] class IssueClosedFormatter @Inject() (
+    footerParser: FooterParser
+) extends MaybeFormatter {
   private val pat =
     """^(.+ was closed by .+)""".r
 

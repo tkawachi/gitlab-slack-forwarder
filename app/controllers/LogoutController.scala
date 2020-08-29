@@ -8,9 +8,10 @@ import play.api.mvc.{
   ControllerComponents
 }
 
-class LogoutController @Inject()(cc: ControllerComponents)
+class LogoutController @Inject() (cc: ControllerComponents)
     extends AbstractController(cc) {
-  def logout: Action[AnyContent] = Action {
-    Redirect(routes.HomeController.index()).withNewSession
-  }
+  def logout: Action[AnyContent] =
+    Action {
+      Redirect(routes.HomeController.index()).withNewSession
+    }
 }

@@ -24,7 +24,7 @@ case class ResultCont[A](run: (A => Future[Result]) => Future[Result]) {
     }
 
   def getOrResult[B](
-    ifEmpty: => Result
+      ifEmpty: => Result
   )(implicit ev: A <:< Option[B]): ResultCont[B] =
     ResultCont(cb => run(a => a.map(cb).getOrElse(Future.successful(ifEmpty))))
 
@@ -37,7 +37,7 @@ object ResultCont {
   def pure[A](a: A): ResultCont[A] = ResultCont(cb => cb(a))
 
   def fromFuture[A](
-    future: => Future[A]
+      future: => Future[A]
   )(implicit ec: ExecutionContext): ResultCont[A] =
     ResultCont(cb => future.flatMap(cb))
 

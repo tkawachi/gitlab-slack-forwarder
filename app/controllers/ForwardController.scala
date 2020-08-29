@@ -21,14 +21,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 
 @Singleton
-class ForwardController @Inject()(cc: ControllerComponents,
-                                  userRepository: UserRepository,
-                                  teamTokenRepository: TeamTokenRepository,
-                                  debugDataSaver: DebugDataSaver,
-                                  messageFormatter: MessageFormatter,
-                                  implicit val ec: ExecutionContext,
-                                  @Named("io") ioec: ExecutionContext)
-    extends AbstractController(cc)
+class ForwardController @Inject() (
+    cc: ControllerComponents,
+    userRepository: UserRepository,
+    teamTokenRepository: TeamTokenRepository,
+    debugDataSaver: DebugDataSaver,
+    messageFormatter: MessageFormatter,
+    implicit val ec: ExecutionContext,
+    @Named("io") ioec: ExecutionContext
+) extends AbstractController(cc)
     with LazyLogging {
 
   private val slack = Slack.getInstance()
@@ -39,8 +40,10 @@ class ForwardController @Inject()(cc: ControllerComponents,
       Ok
     }
 
-  private def notifySlack(user: User,
-                          blocks: Seq[LayoutBlock]): ResultCont[Unit] =
+  private def notifySlack(
+      user: User,
+      blocks: Seq[LayoutBlock]
+  ): ResultCont[Unit] =
     ResultCont
       .fromFuture(teamTokenRepository.findBy(user.teamId))
       .getOrResult {
@@ -64,7 +67,7 @@ class ForwardController @Inject()(cc: ControllerComponents,
       }
 
   def parseEnvelopeTo(
-    data: Map[String, Seq[String]]
+      data: Map[String, Seq[String]]
   ): ResultCont[Seq[String]] = {
     for {
       envelopes <- ResultCont.fromOption(data.get("envelope")) {
