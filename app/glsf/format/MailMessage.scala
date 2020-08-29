@@ -1,6 +1,6 @@
 package glsf.format
 
-case class Message(dataParts: Map[String, Seq[String]]) {
+case class MailMessage(dataParts: Map[String, Seq[String]]) {
   def maybeSingle(key: String): Option[String] =
     dataParts
       .get(key)

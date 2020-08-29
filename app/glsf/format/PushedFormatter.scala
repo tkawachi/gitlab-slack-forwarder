@@ -1,7 +1,5 @@
 package glsf.format
 
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
-import com.slack.api.model.block.composition.MarkdownTextObject
 import javax.inject.Inject
 
 private[format] class PushedFormatter @Inject() (footerParser: FooterParser)
@@ -9,7 +7,7 @@ private[format] class PushedFormatter @Inject() (footerParser: FooterParser)
   private val pat =
     """(?m)^(.+ pushed new commits to merge request ![0-9]+)$""".r
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] = {
+  override def format(message: MailMessage): Option[SlackMessage] = {
     for {
       subject <- message.maybeSubject
       text <- message.maybeText
@@ -18,17 +16,7 @@ private[format] class PushedFormatter @Inject() (footerParser: FooterParser)
     } yield {
       val message = m.group(1).strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
-      Seq(
-        SectionBlock
-          .builder()
-          .text(
-            MarkdownTextObject
-              .builder()
-              .text(s":muscle: $linkedSubject\n$message")
-              .build()
-          )
-          .build()
-      )
+      SlackMessage.fromMrkdwn(s":muscle: $linkedSubject\n$message")
     }
   }
 }
