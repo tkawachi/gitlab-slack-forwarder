@@ -17,7 +17,7 @@ lazy val root = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
       "com.slack.api" % "slack-api-client" % "1.0.10",
-      "com.google.firebase" % "firebase-admin" % "6.11.0"
+      "com.google.firebase" % "firebase-admin" % "7.0.0"
     ),
     dockerBaseImage := "openjdk:11.0-slim",
     dockerRepository := Some("us.gcr.io/gitlabslackforwarder")
