@@ -5,26 +5,57 @@
 
 @maybeUser match {
 case Some(user) => {
-    @maybeTeamToken match {
-        case None => {
-            <div>
-            You have not yet added a Gmail Slack forwarder to your workspace. You can add it to your workspace via the Add to Slack button.
-            </div>
-            <a href="https://slack.com/oauth/v2/authorize?scope=chat:write&client_id=@clientId&team=@{user.teamId}&redirect_uri=@addCallback"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@@2x.png 2x" /></a>
-        }
-        case Some(teamToken) => {
-            Please set <code>@{user.mail}</code> as GitLab notification address.
-        }
-    }
-    <div>
-        <a href="@{routes.LogoutController.logout}">Logout</a>
-    </div>
+@maybeTeamToken match {
+case None => {
+<div>
+    You have not yet added a Gmail Slack forwarder to your workspace. You can add it to your workspace via the Add to
+    Slack button.
+</div>
+<a href="https://slack.com/oauth/v2/authorize?scope=chat:write&client_id=@clientId&team=@{user.teamId}&redirect_uri=@addCallback"><img
+        alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png"
+        srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@@2x.png 2x"/></a>
+}
+case Some(teamToken) => {
+<div>
+    Your address is: <code>@{user.mail}</code>
+</div>
+You can receive notifications in Slack by making this email address a GitLab notification address.
+}
+}
+<div>
+    <a href="@{routes.LogoutController.logout}">Logout</a>
+</div>
 }
 case None => {
 <a href="https://slack.com/oauth/v2/authorize?user_scope=identity.basic&client_id=@clientId&redirect_uri=@signInCallback"><img
         alt="Sign in with Slack" height="40" width="172"
         src="https://platform.slack-edge.com/img/sign_in_with_slack.png"
         srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@@2x.png 2x"/></a>
+
+<div>
+The application forwards personal email notifications from GitLab to a direct message in Slack. By forwarding notifications to Slack, we can communicate better and be more accountable for our activities.
+</div>
+
+<h2>How it works</h2>
+
+<div>
+When you sign in with the "Sign in with slack" button, you are given an email address. Emails to this address are forwarded to a direct message in Slack, so you can set up GitLab to notify you with this email address so that you can receive notifications in Slack.
+Because it's formatted for readability when it's forwarded, you'll receive the notification in a more readable format than if you were to receive it through Slack's built-in features.
+</div>
+<div>
+If you have multiple workspace accounts in Slack, be sure to sign in with the workspace you want to receive notifications from.
+If you are the first workspace to sign in to the app, you'll see an "Add to Slack" button.
+</div>
+<h2>FAQ</h2>
+
+<h3>How much is it?</h3>
+
+It's free (at least for the time being). We're offering it for free for now because we use a low-cost infrastructure to operate it.
+
+<h3>Who is developing it?</h3>
+
+It is mainly developed by Takashi Kawachi.
+
 }
 }
 }

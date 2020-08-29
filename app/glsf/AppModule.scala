@@ -54,7 +54,12 @@ class AppModule extends AbstractModule with LazyLogging {
       .setCredentials(credentials)
       .setProjectId(appConfig.gcpProjectId)
       .build()
-    FirebaseApp.initializeApp(options)
+    try {
+      FirebaseApp.initializeApp(options)
+    } catch {
+      case e: IllegalStateException =>
+        logger.debug("FirebaseApp is already initialized", e)
+    }
     FirestoreClient.getFirestore
   }
 
