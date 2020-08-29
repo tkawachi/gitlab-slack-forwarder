@@ -1,7 +1,5 @@
 package glsf.format
 
-import com.slack.api.model.block.composition.MarkdownTextObject
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
 private[format] class IssueClosedViaMRFormatter @Inject() (
@@ -10,7 +8,7 @@ private[format] class IssueClosedViaMRFormatter @Inject() (
   private val pat =
     """^(Issue was closed by .+ via merge request) (![0-9]+) \((.+)\)""".r
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] = {
+  override def format(message: MailMessage): Option[SlackMessage] = {
     for {
       subject <- message.maybeSubject
       text <- message.maybeText
@@ -22,17 +20,7 @@ private[format] class IssueClosedViaMRFormatter @Inject() (
       val mrUrl = m.group(3).strip()
       val mrLink = Link(mrUrl, mrText).toMrkdwn
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
-      Seq(
-        SectionBlock
-          .builder()
-          .text(
-            MarkdownTextObject
-              .builder()
-              .text(s":package: $linkedSubject\n$text $mrLink")
-              .build()
-          )
-          .build()
-      )
+      SlackMessage.fromMrkdwn(s":package: $linkedSubject\n$text $mrLink")
     }
   }
 }

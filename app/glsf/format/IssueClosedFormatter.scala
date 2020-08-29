@@ -1,7 +1,5 @@
 package glsf.format
 
-import com.slack.api.model.block.composition.MarkdownTextObject
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
 private[format] class IssueClosedFormatter @Inject() (
@@ -10,7 +8,7 @@ private[format] class IssueClosedFormatter @Inject() (
   private val pat =
     """^(.+ was closed by .+)""".r
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] = {
+  override def format(message: MailMessage): Option[SlackMessage] = {
     for {
       subject <- message.maybeSubject
       text <- message.maybeText
@@ -19,17 +17,7 @@ private[format] class IssueClosedFormatter @Inject() (
     } yield {
       val text = m.group(1).strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
-      Seq(
-        SectionBlock
-          .builder()
-          .text(
-            MarkdownTextObject
-              .builder()
-              .text(s":package: $linkedSubject\n$text")
-              .build()
-          )
-          .build()
-      )
+      SlackMessage.fromMrkdwn(s":package: $linkedSubject\n$text")
     }
   }
 }

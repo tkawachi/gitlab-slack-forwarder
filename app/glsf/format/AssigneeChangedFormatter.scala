@@ -1,7 +1,5 @@
 package glsf.format
 
-import com.slack.api.model.block.composition.MarkdownTextObject
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
 private[format] class AssigneeChangedFormatter @Inject() (
@@ -10,7 +8,7 @@ private[format] class AssigneeChangedFormatter @Inject() (
 
   private val pat = """(?m)^(Assignee changed .* to .*)$""".r
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] = {
+  override def format(message: MailMessage): Option[SlackMessage] = {
     for {
       subject <- message.maybeSubject
       text <- message.maybeText
@@ -19,17 +17,7 @@ private[format] class AssigneeChangedFormatter @Inject() (
     } yield {
       val line = m.group(1).strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
-      Seq(
-        SectionBlock
-          .builder()
-          .text(
-            MarkdownTextObject
-              .builder()
-              .text(s":frog: $linkedSubject\n$line")
-              .build()
-          )
-          .build()
-      )
+      SlackMessage.fromMrkdwn(s":frog: $linkedSubject\n$line")
     }
   }
 }

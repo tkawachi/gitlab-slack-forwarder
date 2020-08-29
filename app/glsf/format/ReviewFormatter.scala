@@ -1,7 +1,5 @@
 package glsf.format
 
-import com.slack.api.model.block.composition.MarkdownTextObject
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
 private[format] class ReviewFormatter @Inject() (footerParser: FooterParser)
@@ -10,7 +8,7 @@ private[format] class ReviewFormatter @Inject() (footerParser: FooterParser)
   private val pat =
     """^Merge request http.+ was reviewed by (.+)(?s)(.+)""".r
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] = {
+  override def format(message: MailMessage): Option[SlackMessage] = {
     for {
       subject <- message.maybeSubject
       text <- message.maybeText
@@ -26,17 +24,7 @@ private[format] class ReviewFormatter @Inject() (footerParser: FooterParser)
           .replaceAll("(?m)^.+ started a new discussion on .+$", "")
           .strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
-      Seq(
-        SectionBlock
-          .builder()
-          .text(
-            MarkdownTextObject
-              .builder()
-              .text(s":speech_balloon: $linkedSubject\n$who:\n$rest")
-              .build()
-          )
-          .build()
-      )
+      SlackMessage.fromMrkdwn(s":speech_balloon: $linkedSubject\n$who:\n$rest")
     }
   }
 }

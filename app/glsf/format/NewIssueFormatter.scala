@@ -1,7 +1,5 @@
 package glsf.format
 
-import com.slack.api.model.block.composition.MarkdownTextObject
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
 private[format] class NewIssueFormatter @Inject() (footerParser: FooterParser)
@@ -9,7 +7,7 @@ private[format] class NewIssueFormatter @Inject() (footerParser: FooterParser)
   private val pat =
     """^(.+ created an issue): http""".r
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] = {
+  override def format(message: MailMessage): Option[SlackMessage] = {
     for {
       subject <- message.maybeSubject
       text <- message.maybeText
@@ -18,17 +16,7 @@ private[format] class NewIssueFormatter @Inject() (footerParser: FooterParser)
     } yield {
       val line = m.group(1).strip()
       val linkedSubject = Link(bodyFooter.url, subject).toMrkdwn
-      Seq(
-        SectionBlock
-          .builder()
-          .text(
-            MarkdownTextObject
-              .builder()
-              .text(s":memo: $linkedSubject\n$line")
-              .build()
-          )
-          .build()
-      )
+      SlackMessage.fromMrkdwn(s":memo: $linkedSubject\n$line")
     }
   }
 }

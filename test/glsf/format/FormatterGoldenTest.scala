@@ -28,9 +28,9 @@ private[format] trait FormatterGoldenTest extends Assertions {
     Json.parse(s)
   }
 
-  private val message = Message(readDataParts(testCase))
+  private val message = MailMessage(readDataParts(testCase))
   private val expected = readBlocks(testCase)
 
-  private val blocks = formatter.format(message)
-  assert(blocks.map(blocksJson).contains(expected))
+  private val slackMessage = formatter.format(message)
+  assert(slackMessage.map(sm => blocksJson(sm.blocks)).contains(expected))
 }

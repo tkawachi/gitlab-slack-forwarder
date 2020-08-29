@@ -2,9 +2,8 @@ package controllers
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.model.block.LayoutBlock
 import com.typesafe.scalalogging.LazyLogging
-import glsf.format.{Message, MessageFormatter}
+import glsf.format.{MailMessage, MessageFormatter, SlackMessage}
 import glsf.{DebugDataSaver, TeamTokenRepository, User, UserRepository}
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.Files
@@ -42,7 +41,7 @@ class ForwardController @Inject() (
 
   private def notifySlack(
       user: User,
-      blocks: Seq[LayoutBlock]
+      sm: SlackMessage
   ): ResultCont[Unit] =
     ResultCont
       .fromFuture(teamTokenRepository.findBy(user.teamId))
@@ -57,7 +56,9 @@ class ForwardController @Inject() (
           val message = ChatPostMessageRequest
             .builder()
             .channel(user.userId)
-            .blocks(blocks.asJava)
+            .text(sm.mrkdwn)
+            .mrkdwn(true)
+            .blocks(sm.blocks.asJava)
             .build()
           val resp = m.chatPostMessage(message)
           if (!resp.isOk) {
@@ -82,7 +83,7 @@ class ForwardController @Inject() (
     } yield tos
   }
 
-  def formatMessage(message: Message): ResultCont[Seq[LayoutBlock]] = {
+  def formatMessage(message: MailMessage): ResultCont[SlackMessage] = {
     messageFormatter.format(message) match {
       case Some(blocks) => ResultCont.pure(blocks)
       case None =>
@@ -102,12 +103,12 @@ class ForwardController @Inject() (
     Action.async(cc.parsers.multipartFormData) { implicit request =>
       // ref. https://sendgrid.com/docs/for-developers/parsing-email/setting-up-the-inbound-parse-webhook/
       val data = request.body.dataParts
-      val message = Message(data)
+      val message = MailMessage(data)
       (for {
         tos <- parseEnvelopeTo(data)
         user <- findUser(tos.head) // TODO
-        blocks <- formatMessage(message)
-        _ <- notifySlack(user, blocks)
+        slackMessage <- formatMessage(message)
+        _ <- notifySlack(user, slackMessage)
       } yield Ok).run_
     }
 }

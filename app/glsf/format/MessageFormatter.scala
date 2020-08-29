@@ -1,38 +1,26 @@
 package glsf.format
 
-import com.slack.api.model.block.composition.MarkdownTextObject
-import com.slack.api.model.block.{LayoutBlock, SectionBlock}
 import javax.inject.Inject
 
 class MessageFormatter @Inject() (formatters: Seq[MaybeFormatter])
     extends MaybeFormatter {
 
-  override def format(message: Message): Option[Seq[LayoutBlock]] =
+  override def format(message: MailMessage): Option[SlackMessage] =
     formatters
-      .foldLeft(None: Option[Seq[LayoutBlock]])((maybeBlocks, formatter) =>
+      .foldLeft(None: Option[SlackMessage])((maybeBlocks, formatter) =>
         maybeBlocks.orElse(formatter.format(message))
       )
 
-  def formatOrDefault(message: Message): Seq[LayoutBlock] =
+  def formatOrDefault(message: MailMessage): SlackMessage =
     format(message).getOrElse(defaultFallback(message))
 
   /**
     * Default fallback for unknown format mail.
     */
-  def defaultFallback(message: Message): Seq[LayoutBlock] = {
+  def defaultFallback(message: MailMessage): SlackMessage = {
     val body =
       Seq(message.maybeSubject, message.maybeText).flatten.mkString("\n")
-    Seq(
-      SectionBlock
-        .builder()
-        .text(
-          MarkdownTextObject
-            .builder()
-            .text(body)
-            .build()
-        )
-        .build()
-    )
+    SlackMessage.fromMrkdwn(body)
   }
 
 }
