@@ -19,6 +19,7 @@ class FormatterModule extends AbstractModule {
       newIssueFormatter: NewIssueFormatter,
       newMRFormatter: NewMRFormatter,
       pipelineFailedFormatter: PipelineFailedFormatter,
+      pipelineFixedFormatter: PipelineFixedFormatter,
       pushedFormatter: PushedFormatter,
       conflictFormatter: ConflictFormatter,
       reviewFormatter: ReviewFormatter
@@ -34,6 +35,7 @@ class FormatterModule extends AbstractModule {
       newIssueFormatter,
       newMRFormatter,
       pipelineFailedFormatter,
+      pipelineFixedFormatter,
       pushedFormatter,
       conflictFormatter,
       reviewFormatter
