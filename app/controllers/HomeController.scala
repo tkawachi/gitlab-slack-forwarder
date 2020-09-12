@@ -48,4 +48,7 @@ class HomeController @Inject() (
           )
       )).run_
     }
+
+  def privacyPolicy(): Action[AnyContent] =
+    Action { Ok(views.html.privacyPolicy()) }
 }

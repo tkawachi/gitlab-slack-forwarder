@@ -19,7 +19,12 @@
         @* And here's where we render the `Html` object containing
          * the page content. *@
         @content
-
+        <footer>
+            <nav>
+                <a href="@routes.HomeController.index()">Top</a>
+                <a href="@routes.HomeController.privacyPolicy()">Privacy policy</a>
+            </nav>
+        </footer>
       <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
     </body>
 </html>
