@@ -9,6 +9,7 @@ class MessageFormatterTest extends FunSuite {
 
   private val testCases =
     Seq(
+      "added-as-approver1",
       "all-discussion-resolved1",
       "approve1",
       "assignee-changed1",
@@ -32,6 +33,7 @@ class MessageFormatterTest extends FunSuite {
       new FormatterGoldenTest {
         override def formatter: MaybeFormatter =
           injector.getInstance(classOf[MessageFormatter])
+
         override def testCase: String = tc
       }
     }
