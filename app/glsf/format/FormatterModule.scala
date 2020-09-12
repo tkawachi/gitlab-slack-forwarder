@@ -9,6 +9,7 @@ class FormatterModule extends AbstractModule {
   @Singleton
   @Provides
   def formatters(
+      addedAsApproverFormatter: AddedAsApproverFormatter,
       allDiscussionResolvedFormatter: AllDiscussionResolvedFormatter,
       assigneeChangedFormatter: AssigneeChangedFormatter,
       approveFormatter: ApproveFormatter,
@@ -25,6 +26,7 @@ class FormatterModule extends AbstractModule {
       reviewFormatter: ReviewFormatter
   ): Seq[MaybeFormatter] =
     Seq(
+      addedAsApproverFormatter,
       allDiscussionResolvedFormatter,
       assigneeChangedFormatter,
       approveFormatter,
