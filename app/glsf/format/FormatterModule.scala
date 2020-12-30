@@ -23,7 +23,8 @@ class FormatterModule extends AbstractModule {
       pipelineFixedFormatter: PipelineFixedFormatter,
       pushedFormatter: PushedFormatter,
       conflictFormatter: ConflictFormatter,
-      reviewFormatter: ReviewFormatter
+      reviewFormatter: ReviewFormatter,
+      scheduledToMergeFormatter: ScheduledToMergeFormatter
   ): Seq[MaybeFormatter] =
     Seq(
       addedAsApproverFormatter,
@@ -40,6 +41,7 @@ class FormatterModule extends AbstractModule {
       pipelineFixedFormatter,
       pushedFormatter,
       conflictFormatter,
-      reviewFormatter
+      reviewFormatter,
+      scheduledToMergeFormatter
     )
 }

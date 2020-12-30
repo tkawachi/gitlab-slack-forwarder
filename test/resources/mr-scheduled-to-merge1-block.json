@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":stopwatch: <https://example.com/foo/bar/-/merge_requests/12345|Re: proj | Sample subject (!12345)>\nMerge Request !12345 was scheduled to merge after pipeline succeeds by John Doe"
+      }
+    }
+  ]
+}

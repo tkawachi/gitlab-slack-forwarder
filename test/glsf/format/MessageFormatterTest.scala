@@ -25,7 +25,8 @@ class MessageFormatterTest extends FunSuite {
       "pipeline-fixed1",
       "pushed1",
       "conflict1",
-      "review1"
+      "review1",
+      "mr-scheduled-to-merge1"
     )
 
   testCases.foreach { tc =>
