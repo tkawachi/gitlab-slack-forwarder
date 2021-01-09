@@ -26,6 +26,7 @@ class MessageFormatterTest extends FunSuite {
       "pushed1",
       "conflict1",
       "review1",
+      "reviewer-changed1",
       "mr-scheduled-to-merge1"
     )
 

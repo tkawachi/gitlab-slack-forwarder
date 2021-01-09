@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 class AssigneeChangedFormatterTest extends FunSuite {
   private val injector = Guice.createInjector(new FormatterModule)
 
-  Seq("assignee-changed1").foreach { name =>
+  Seq("assignee-changed1", "reviewer-changed1").foreach { name =>
     test(s"format $name") {
       new FormatterGoldenTest {
         override def formatter: MaybeFormatter =

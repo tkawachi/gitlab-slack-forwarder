@@ -6,7 +6,7 @@ private[format] class AssigneeChangedFormatter @Inject() (
     footerParser: FooterParser
 ) extends MaybeFormatter {
 
-  private val pat = """(?m)^(Assignee changed .* to .*)$""".r
+  private val pat = """(?m)^((?:Assignee|Reviewer) changed .*)$""".r
 
   override def format(message: MailMessage): Option[SlackMessage] = {
     for {
