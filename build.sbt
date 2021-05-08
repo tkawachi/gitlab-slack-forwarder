@@ -16,7 +16,7 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig" % "0.15.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.3",
-      "com.slack.api" % "slack-api-client" % "1.0.10",
+      "com.slack.api" % "slack-api-client" % "1.0.11",
       "com.google.firebase" % "firebase-admin" % "7.2.0"
     ),
     dockerBaseImage := "openjdk:11.0-slim",
