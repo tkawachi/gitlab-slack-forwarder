@@ -14,8 +14,7 @@ class MessageFormatter @Inject() (formatters: Seq[MaybeFormatter])
   def formatOrDefault(message: MailMessage): SlackMessage =
     format(message).getOrElse(defaultFallback(message))
 
-  /**
-    * Default fallback for unknown format mail.
+  /** Default fallback for unknown format mail.
     */
   def defaultFallback(message: MailMessage): SlackMessage = {
     val body =
