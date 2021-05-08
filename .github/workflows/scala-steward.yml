@@ -14,3 +14,4 @@ jobs:
         with:
           github-token: ${{ secrets.REPO_GITHUB_TOKEN }}
           github-repository: tkawachi/gitlab-slack-forwarder
+          author-email: tkawachi@gmail.com
