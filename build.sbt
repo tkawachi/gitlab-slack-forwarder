@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.3",
       "com.slack.api" % "slack-api-client" % "1.7.1",
       "com.google.firebase" % "firebase-admin" % "7.2.0",
-      "com.google.cloud" % "google-cloud-logging-logback" % "0.120.5-alpha" % Runtime
+      "com.google.cloud" % "google-cloud-logging-logback" % "0.120.6-alpha" % Runtime
     ),
     dockerBaseImage := "openjdk:11.0-slim",
     dockerRepository := Some("us.gcr.io/gitlabslackforwarder")
