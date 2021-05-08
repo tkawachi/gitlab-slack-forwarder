@@ -6,13 +6,11 @@ private[format] abstract class AbstractBodyPatternFormatter(
     footerParser: FooterParser
 ) extends MaybeFormatter {
 
-  /**
-    * 本文に合致するパターン。
+  /** 本文に合致するパターン。
     */
   protected def bodyPattern: Regex
 
-  /**
-    * 通知の先頭に入れる slack 絵文字。
+  /** 通知の先頭に入れる slack 絵文字。
     */
   protected def emoji: String
 
