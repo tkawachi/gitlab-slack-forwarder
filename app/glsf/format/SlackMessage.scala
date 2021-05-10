@@ -7,19 +7,22 @@ case class SlackMessage(mrkdwn: String, blocks: Seq[LayoutBlock])
 
 object SlackMessage {
 
-  def fromMrkdwn(mrkdwn: String): SlackMessage =
+  def fromMrkdwn(mrkdwn: String): SlackMessage = {
+    val maxLen = 3000
+    val truncatedMrkdwn = mrkdwn.take(maxLen)
     SlackMessage(
-      mrkdwn,
+      truncatedMrkdwn,
       Seq(
         SectionBlock
           .builder()
           .text(
             MarkdownTextObject
               .builder()
-              .text(mrkdwn)
+              .text(truncatedMrkdwn)
               .build()
           )
           .build()
       )
     )
+  }
 }
