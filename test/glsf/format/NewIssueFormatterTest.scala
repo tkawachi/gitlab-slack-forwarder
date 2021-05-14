@@ -1,9 +1,9 @@
 package glsf.format
 
 import com.google.inject.Guice
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NewIssueFormatterTest extends FunSuite {
+class NewIssueFormatterTest extends AnyFunSuite {
   private val injector = Guice.createInjector(new FormatterModule)
 
   test("format new-issue1") {

@@ -1,9 +1,9 @@
 package glsf.format
 
 import com.google.inject.Guice
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ScheduledToMergeFormatterTest extends FunSuite {
+class ScheduledToMergeFormatterTest extends AnyFunSuite {
   private val injector = Guice.createInjector(new FormatterModule)
 
   Seq("mr-scheduled-to-merge1").foreach { name =>
