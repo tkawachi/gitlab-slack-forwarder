@@ -1,7 +1,7 @@
 pull_request_rules:
   - name: Automatic merge on approval
     conditions:
-      - check-success~=Scala CI / build
+      - check-success~=Scala CI
       - check-success~=security/snyk
     actions:
       merge:
