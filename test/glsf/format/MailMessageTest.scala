@@ -1,8 +1,8 @@
 package glsf.format
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MailMessageTest extends FunSuite {
+class MailMessageTest extends AnyFunSuite {
   test("escape") {
     val text =
       MailMessage(Map("foo" -> Seq("<><>fo\n>\r\n>\n<o&&bar;+")))
