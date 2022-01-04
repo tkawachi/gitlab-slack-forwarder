@@ -1,13 +1,13 @@
 package controllers
 
 import com.typesafe.scalalogging.LazyLogging
-import glsf._
-import javax.inject.{Inject, Singleton}
+import glsf.*
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
-import play.api.mvc._
+import play.api.mvc.*
 import util.ResultCont
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 

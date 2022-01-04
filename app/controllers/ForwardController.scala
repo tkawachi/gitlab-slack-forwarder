@@ -5,7 +5,6 @@ import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.typesafe.scalalogging.LazyLogging
 import glsf.format.{MailMessage, MessageFormatter, SlackMessage}
 import glsf.{DebugDataSaver, TeamTokenRepository, User, UserRepository}
-import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.Files
 import play.api.libs.json.Json
 import play.api.mvc.{
@@ -16,8 +15,9 @@ import play.api.mvc.{
 }
 import util.ResultCont
 
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @Singleton
 class ForwardController @Inject() (

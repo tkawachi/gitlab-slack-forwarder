@@ -1,10 +1,10 @@
 package controllers
 
 import glsf.{SlackConfig, TeamToken, TeamTokenRepository}
-import javax.inject._
-import play.api.mvc._
+import play.api.mvc.*
 import util.ResultCont
 
+import javax.inject.*
 import scala.concurrent.ExecutionContext
 
 /** This controller creates an `Action` to handle HTTP requests to the

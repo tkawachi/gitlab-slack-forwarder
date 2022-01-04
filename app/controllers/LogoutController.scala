@@ -1,12 +1,13 @@
 package controllers
 
-import javax.inject.Inject
 import play.api.mvc.{
   AbstractController,
   Action,
   AnyContent,
   ControllerComponents
 }
+
+import javax.inject.Inject
 
 class LogoutController @Inject() (cc: ControllerComponents)
     extends AbstractController(cc) {

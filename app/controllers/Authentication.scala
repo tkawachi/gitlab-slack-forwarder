@@ -1,11 +1,11 @@
 package controllers
 
 import com.typesafe.scalalogging.LazyLogging
-import glsf.{MailGenerator, User, UserRepository}
-import javax.inject.Inject
+import glsf.{User, UserRepository}
 import play.api.mvc.Request
 import util.ResultCont
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class Authentication @Inject() (
