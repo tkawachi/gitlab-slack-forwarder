@@ -5,7 +5,7 @@ import glsf.*
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.*
-import zio.{Runtime, Task, ZEnv, ZIO}
+import zio.{IO, Runtime, Task, ZEnv, ZIO}
 
 import javax.inject.{Inject, Singleton}
 
@@ -21,7 +21,7 @@ class SlackCallback @Inject() (
 ) extends AbstractController(cc)
     with LazyLogging {
 
-  private def getCode(request: Request[_]): ZIO[Any, Result, String] =
+  private def getCode(request: Request[_]): IO[Result, String] =
     ZIO
       .fromOption(request.getQueryString("code"))
       .mapError(_ =>
@@ -34,7 +34,7 @@ class SlackCallback @Inject() (
   private def getAccessJson(
       code: String,
       redirectUri: String
-  ): ZIO[Any, Result, JsValue] = {
+  ): IO[Result, JsValue] = {
     zio.Task
       .fromFuture(_ =>
         ws.url(slackConfig.accessUrl)
@@ -69,7 +69,7 @@ class SlackCallback @Inject() (
       }
   }
 
-  private def checkOk(json: JsValue): ZIO[Any, Result, Unit] =
+  private def checkOk(json: JsValue): IO[Result, Unit] =
     Task((json \ "ok").as[Boolean])
       .mapError { e =>
         logger.warn("Slack response doesn't contain 'ok'", e)
@@ -88,7 +88,7 @@ class SlackCallback @Inject() (
 
   private val createMailMaxRetry = 20
 
-  private def createMail(retry: Int = 0): ZIO[Any, Result, String] = {
+  private def createMail(retry: Int = 0): IO[Result, String] = {
     mailGenerator.generate().flatMap { m =>
       userRepository
         .findBy(m)
@@ -112,7 +112,7 @@ class SlackCallback @Inject() (
   private def getOrCreateUser(
       teamId: String,
       userId: String
-  ): ZIO[Any, Result, User] = {
+  ): IO[Result, User] = {
     userRepository
       .findBy(teamId, userId)
       .mapError { e =>
