@@ -1,9 +1,11 @@
 package glsf
 
-import scala.concurrent.Future
+import zio.Task
 
 trait UserRepository {
-  def findBy(teamId: String, userId: String): Future[Option[User]]
-  def findBy(mail: String): Future[Option[User]]
-  def store(user: User): Future[Unit]
+  def findBy(teamId: String, userId: String): Task[Option[User]]
+
+  def findBy(mail: String): Task[Option[User]]
+
+  def store(user: User): Task[Unit]
 }

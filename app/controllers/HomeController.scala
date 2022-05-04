@@ -2,10 +2,9 @@ package controllers
 
 import glsf.{SlackConfig, TeamToken, TeamTokenRepository}
 import play.api.mvc.*
-import util.ResultCont
+import zio.{Runtime, Task, ZEnv}
 
 import javax.inject.*
-import scala.concurrent.ExecutionContext
 
 /** This controller creates an `Action` to handle HTTP requests to the
   * application's home page.
@@ -16,11 +15,11 @@ class HomeController @Inject() (
     slackConfig: SlackConfig,
     authentication: Authentication,
     teamTokenRepository: TeamTokenRepository,
-    implicit val ec: ExecutionContext
+    runtime: Runtime[ZEnv]
 ) extends BaseController {
 
-  private def findTeamToken(teamId: String): ResultCont[Option[TeamToken]] =
-    ResultCont.fromFuture(teamTokenRepository.findBy(teamId))
+  private def findTeamToken(teamId: String): Task[Option[TeamToken]] =
+    teamTokenRepository.findBy(teamId)
 
   /** Create an Action to render an HTML page.
     *
@@ -29,11 +28,11 @@ class HomeController @Inject() (
     */
   def index(): Action[AnyContent] =
     Action.async { implicit request: Request[AnyContent] =>
-      (for {
+      val io = for {
         maybeUser <- authentication.auth(request)
-        maybeTeamToken <- maybeUser.fold(
-          ResultCont.pure(None: Option[TeamToken])
-        )(u => findTeamToken(u.teamId))
+        maybeTeamToken <- maybeUser
+          .map(u => findTeamToken(u.teamId))
+          .getOrElse(Task.none)
       } yield Ok(
         views.html
           .index(
@@ -43,7 +42,8 @@ class HomeController @Inject() (
             slackConfig.signInRedirectUri,
             slackConfig.addRedirectUri
           )
-      )).run_
+      )
+      runtime.unsafeRunToFuture(io)
     }
 
   def privacyPolicy(): Action[AnyContent] =

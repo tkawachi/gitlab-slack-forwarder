@@ -1,20 +1,21 @@
 package glsf
 
 import com.google.cloud.firestore.Firestore
-import javax.inject.{Inject, Named, Singleton}
+import zio.Task
+import zio.blocking.Blocking
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.jdk.CollectionConverters._
+import javax.inject.{Inject, Singleton}
+import scala.jdk.CollectionConverters.*
 
 @Singleton
 class FirestoreDebugDataSaver @Inject() (
     firestore: Firestore,
-    @Named("io") implicit val ec: ExecutionContext
+    blocking: Blocking.Service
 ) extends DebugDataSaver {
   private[this] val data = firestore.collection("data")
 
-  override def save(value: Map[String, String]): Future[Unit] =
-    Future {
+  override def save(value: Map[String, String]): Task[Unit] =
+    blocking.effectBlocking {
       data.add(value.asJava).get()
     }
 }

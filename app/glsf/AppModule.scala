@@ -1,28 +1,17 @@
 package glsf
 
-import java.util.concurrent.Executors
-
-import com.google.auth.oauth2.GoogleCredentials
-import com.google.cloud.firestore.Firestore
-import com.google.firebase.cloud.FirestoreClient
-import com.google.firebase.{FirebaseApp, FirebaseOptions}
-import com.google.inject.{AbstractModule, Provides}
+import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import javax.inject.{Named, Singleton}
-import play.api.inject.ApplicationLifecycle
 import pureconfig.ConfigSource
-import pureconfig.generic.auto._
-
-import scala.concurrent.{ExecutionContext, Future}
+import pureconfig.generic.auto.*
+import zio.blocking.Blocking
+import zio.{Runtime, ZEnv}
 
 class AppModule extends AbstractModule with LazyLogging {
   override def configure(): Unit = {
-//    bind(classOf[UserRepository]).to(classOf[MockUserRepository])
-    bind(classOf[UserRepository]).to(classOf[FirestoreUserRepository])
-//    bind(classOf[TeamTokenRepository]).to(classOf[MockTeamTokenRepository])
-    bind(classOf[TeamTokenRepository]).to(classOf[FirestoreTeamTokenRepository])
-    bind(classOf[DebugDataSaver]).to(classOf[FirestoreDebugDataSaver])
+    bind(new TypeLiteral[Runtime[ZEnv]] {}).toInstance(Runtime.default)
+    bind(classOf[Blocking.Service]).toInstance(Blocking.Service.live)
   }
 
   @Provides
@@ -44,36 +33,4 @@ class AppModule extends AbstractModule with LazyLogging {
   def mailGenerator(appConfig: AppConfig): MailGenerator =
     new MailGenerator(appConfig.mailDomain)
 
-  @Singleton
-  @Provides
-  def firestore(appConfig: AppConfig): Firestore = {
-    logger.info("Initializing firebase")
-    val credentials = GoogleCredentials.getApplicationDefault
-    val options = FirebaseOptions
-      .builder()
-      .setCredentials(credentials)
-      .setProjectId(appConfig.gcpProjectId)
-      .build()
-    try {
-      FirebaseApp.initializeApp(options)
-    } catch {
-      case e: IllegalStateException =>
-        logger.debug("FirebaseApp is already initialized", e)
-    }
-    FirestoreClient.getFirestore
-  }
-
-  @Singleton
-  @Named("io")
-  @Provides
-  def ioExecutionContext(
-      applicationLifecycle: ApplicationLifecycle
-  ): ExecutionContext = {
-    logger.info("Initializing I/O execution context")
-    val executors = Executors.newCachedThreadPool()
-    applicationLifecycle.addStopHook(() =>
-      Future.successful(executors.shutdown())
-    )
-    ExecutionContext.fromExecutorService(executors)
-  }
 }

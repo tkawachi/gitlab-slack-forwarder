@@ -5,11 +5,9 @@ import glsf.*
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.*
-import util.ResultCont
+import zio.{Runtime, Task, ZEnv, ZIO}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import scala.util.control.NonFatal
 
 @Singleton
 class SlackCallback @Inject() (
@@ -19,24 +17,26 @@ class SlackCallback @Inject() (
     mailGenerator: MailGenerator,
     userRepository: UserRepository,
     teamTokenRepository: TeamTokenRepository,
-    implicit val ec: ExecutionContext
+    runtime: Runtime[ZEnv]
 ) extends AbstractController(cc)
     with LazyLogging {
 
-  private def getCode(request: Request[_]): ResultCont[String] =
-    ResultCont.fromOption(request.getQueryString("code"))(
-      BadRequest(
-        views.html
-          .error("Failed to sign in Slack", "Failed to sign in Slack")
+  private def getCode(request: Request[_]): ZIO[Any, Result, String] =
+    ZIO
+      .fromOption(request.getQueryString("code"))
+      .mapError(_ =>
+        BadRequest(
+          views.html
+            .error("Failed to sign in Slack", "Failed to sign in Slack")
+        )
       )
-    )
 
   private def getAccessJson(
       code: String,
       redirectUri: String
-  ): ResultCont[JsValue] = {
-    ResultCont
-      .fromFuture(
+  ): ZIO[Any, Result, JsValue] = {
+    zio.Task
+      .fromFuture(_ =>
         ws.url(slackConfig.accessUrl)
           .post(
             Map(
@@ -47,86 +47,99 @@ class SlackCallback @Inject() (
             )
           )
       )
+      .mapError { e =>
+        logger.error("failed to access slack", e)
+        InternalServerError(
+          views.html.error("Slack error", "Failed to access slack")
+        )
+      }
+      .filterOrFail(_.status == 200)(
+        BadRequest(
+          views.html.error("Slack error", "Slack response is not 200")
+        )
+      )
       .flatMap { resp =>
-        if (resp.status != 200) {
-          ResultCont.result(
+        Task(Json.parse(resp.body))
+          .mapError { e =>
+            logger.error("Slack returns invalid JSON", e)
             BadRequest(
-              views.html.error("Slack error", "Slack response is not 200")
+              views.html.error("Slack error", "Slack returns invalid JSON")
             )
-          )
-        } else {
-          try {
-            ResultCont.pure(Json.parse(resp.body))
-          } catch {
-            case NonFatal(e) =>
-              ResultCont.result(
-                BadRequest(
-                  views.html.error("Slack error", "Slack returns invalid JSON")
-                )
-              )
           }
-        }
       }
   }
 
-  private def checkOk(json: JsValue): ResultCont[Unit] =
-    try {
-      val ok = (json \ "ok").as[Boolean]
-      if (!ok) {
-        logger.info(s"ok=false $json")
-        ResultCont.result(
-          BadRequest(
-            views.html.error("Slack error", "Slack response ok = false")
-          )
+  private def checkOk(json: JsValue): ZIO[Any, Result, Unit] =
+    Task((json \ "ok").as[Boolean])
+      .mapError { e =>
+        logger.warn("Slack response doesn't contain 'ok'", e)
+        BadRequest(
+          views.html
+            .error("Slack error", "Slack response doesn't contain 'ok'")
         )
-      } else {
-        ResultCont.pure(())
       }
-    } catch {
-      case NonFatal(_) =>
-        ResultCont.result(
-          BadRequest(
-            views.html
-              .error("Slack error", "Slack response doesn't contain 'ok'")
-          )
+      .filterOrFail(identity) {
+        logger.info(s"ok=false $json")
+        BadRequest(
+          views.html.error("Slack error", "Slack response ok = false")
         )
-    }
+      }
+      .unit
 
   private val createMailMaxRetry = 20
 
-  private def createMail(retry: Int = 0): ResultCont[String] = {
-    val m = mailGenerator.generate()
-    ResultCont.fromFuture(userRepository.findBy(m)).flatMap {
-      case Some(_) =>
-        if (retry > createMailMaxRetry) {
-          logger.error("Failed to create unique mail")
-          ResultCont.result(InternalServerError)
-        } else {
-          createMail(retry + 1)
+  private def createMail(retry: Int = 0): ZIO[Any, Result, String] = {
+    mailGenerator.generate().flatMap { m =>
+      userRepository
+        .findBy(m)
+        .mapError { e =>
+          logger.error(s"Failed findBy $m", e)
+          InternalServerError
         }
-      case None => ResultCont.pure(m)
+        .flatMap {
+          case Some(_) =>
+            if (retry > createMailMaxRetry) {
+              logger.error("Failed to create unique mail")
+              ZIO.fail(InternalServerError)
+            } else {
+              createMail(retry + 1)
+            }
+          case None => ZIO.succeed(m)
+        }
     }
   }
 
   private def getOrCreateUser(
       teamId: String,
       userId: String
-  ): ResultCont[User] = {
-    ResultCont.fromFuture(userRepository.findBy(teamId, userId)).flatMap {
-      case Some(user) =>
-        ResultCont.pure(user)
-      case None =>
-        createMail().flatMap { mail =>
-          val user = User(teamId, userId, mail)
-          logger.info(s"Creating new user: $user")
-          ResultCont.fromFuture(userRepository.store(user)).map(_ => user)
-        }
-    }
+  ): ZIO[Any, Result, User] = {
+    userRepository
+      .findBy(teamId, userId)
+      .mapError { e =>
+        logger.error("UserRepository.findBy", e)
+        InternalServerError
+      }
+      .flatMap {
+        case Some(user) =>
+          ZIO.succeed(user)
+        case None =>
+          createMail().flatMap { mail =>
+            val user = User(teamId, userId, mail)
+            logger.info(s"Creating new user: $user")
+            userRepository
+              .store(user)
+              .map(_ => user)
+              .mapError { e =>
+                logger.error("UserRepository.store", e)
+                InternalServerError
+              }
+          }
+      }
   }
 
   def signIn: Action[AnyContent] =
     Action.async { request =>
-      (for {
+      runtime.unsafeRunToFuture((for {
         code <- getCode(request)
         json <- getAccessJson(code, slackConfig.signInRedirectUri)
         _ <- checkOk(json)
@@ -136,12 +149,12 @@ class SlackCallback @Inject() (
       } yield {
         Redirect(routes.HomeController.index()).withNewSession
           .withSession("teamId" -> user.teamId, "userId" -> user.userId)
-      }).run_
+      }).merge)
     }
 
   def add: Action[AnyContent] =
     Action.async { request =>
-      (for {
+      runtime.unsafeRunToFuture((for {
         code <- getCode(request)
         json <- getAccessJson(code, slackConfig.addRedirectUri)
         _ <- checkOk(json)
@@ -154,7 +167,10 @@ class SlackCallback @Inject() (
           TeamToken(teamId, teamName, scope, botUserId, botAccessToken)
         _ =
           logger.info(s"Storing TeamToken: $teamId $teamName $scope $botUserId")
-        _ <- ResultCont.fromFuture(teamTokenRepository.store(teamToken))
-      } yield Redirect(routes.HomeController.index())).run_
+        _ <- teamTokenRepository.store(teamToken).mapError { e =>
+          logger.error("TeamTokenRepository.store", e)
+          InternalServerError
+        }
+      } yield Redirect(routes.HomeController.index())).merge)
     }
 }

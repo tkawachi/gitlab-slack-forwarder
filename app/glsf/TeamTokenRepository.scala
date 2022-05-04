@@ -1,8 +1,9 @@
 package glsf
 
-import scala.concurrent.Future
+import zio.Task
 
 trait TeamTokenRepository {
-  def findBy(teamId: String): Future[Option[TeamToken]]
-  def store(teamToken: TeamToken): Future[Unit]
+  def findBy(teamId: String): Task[Option[TeamToken]]
+
+  def store(teamToken: TeamToken): Task[Unit]
 }

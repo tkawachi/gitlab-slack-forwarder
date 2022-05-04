@@ -3,35 +3,27 @@ package controllers
 import com.typesafe.scalalogging.LazyLogging
 import glsf.{User, UserRepository}
 import play.api.mvc.Request
-import util.ResultCont
+import zio.{Task, UIO}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class Authentication @Inject() (
-    userRepository: UserRepository,
-    implicit val ec: ExecutionContext
+    userRepository: UserRepository
 ) extends LazyLogging {
-  private def auth2(request: Request[_]): ResultCont[Option[(String, String)]] =
-    ResultCont.pure {
-      for {
-        teamId <- request.session.get("teamId")
-        userId <- request.session.get("userId")
-      } yield (teamId, userId)
-    }
-
-  private def findUser(
-      teamId: String,
-      userId: String
-  ): ResultCont[Option[User]] =
-    ResultCont.fromFuture(userRepository.findBy(teamId, userId))
-
-  def auth(request: Request[_]): ResultCont[Option[User]] =
+  private def auth2(request: Request[_]): Option[(String, String)] =
     for {
-      maybeIds <- auth2(request)
+      teamId <- request.session.get("teamId")
+      userId <- request.session.get("userId")
+    } yield (teamId, userId)
+
+  def auth(request: Request[_]): Task[Option[User]] =
+    for {
+      maybeIds <- UIO(auth2(request))
       maybeUser <-
         maybeIds
-          .map { case (teamId, userId) => findUser(teamId, userId) }
-          .getOrElse(ResultCont.pure(None))
+          .map { case (teamId, userId) =>
+            userRepository.findBy(teamId, userId)
+          }
+          .getOrElse(Task.none)
     } yield maybeUser
 }
