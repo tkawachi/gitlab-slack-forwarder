@@ -8,7 +8,7 @@ import glsf.{DebugDataSaver, TeamTokenRepository, User, UserRepository}
 import play.api.libs.Files
 import play.api.libs.json.Json
 import play.api.mvc.*
-import zio.{Runtime, Task, ZEnv, ZIO}
+import zio.{IO, Runtime, Task, ZEnv, ZIO}
 
 import javax.inject.{Inject, Singleton}
 import scala.jdk.CollectionConverters.*
@@ -26,7 +26,7 @@ class ForwardController @Inject() (
 
   private val slack = Slack.getInstance()
 
-  private def findUser(to: String): ZIO[Any, Result, User] =
+  private def findUser(to: String): IO[Result, User] =
     userRepository
       .findBy(to)
       .mapError { e =>
@@ -41,7 +41,7 @@ class ForwardController @Inject() (
   private def notifySlack(
       user: User,
       sm: SlackMessage
-  ): ZIO[Any, Result, Unit] =
+  ): IO[Result, Unit] =
     teamTokenRepository
       .findBy(user.teamId)
       .mapError { e =>
@@ -70,13 +70,13 @@ class ForwardController @Inject() (
 
   def parseEnvelopeTo(
       data: Map[String, Seq[String]]
-  ): ZIO[Any, Result, Seq[String]] = {
+  ): IO[Result, Seq[String]] = {
     for {
-      envelopes <- ZIO.fromOption(data.get("envelope")).mapError { _ =>
+      envelopes <- IO.fromOption(data.get("envelope")).mapError { _ =>
         logger.info(s"envelope not found: $data")
         BadRequest("envelope not found")
       }
-      envelope <- ZIO.fromOption(envelopes.headOption).mapError { _ =>
+      envelope <- IO.fromOption(envelopes.headOption).mapError { _ =>
         logger.info(s"envelope is empty: $data")
         BadRequest("envelope is empty")
       }
@@ -87,7 +87,7 @@ class ForwardController @Inject() (
     } yield tos
   }
 
-  def formatMessage(message: MailMessage): ZIO[Any, Result, SlackMessage] = {
+  def formatMessage(message: MailMessage): IO[Result, SlackMessage] = {
     messageFormatter.format(message) match {
       case Some(blocks) => ZIO.succeed(blocks)
       case None         =>
