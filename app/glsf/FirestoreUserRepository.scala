@@ -1,19 +1,19 @@
 package glsf
 
-import java.{util => ju}
-
 import com.google.api.core.ApiFuture
 import com.google.cloud.firestore.{FieldValue, Firestore, QuerySnapshot}
 import com.typesafe.scalalogging.LazyLogging
-import javax.inject.{Inject, Named, Singleton}
+import zio.Task
+import zio.blocking.Blocking
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.jdk.CollectionConverters._
+import java.util as ju
+import javax.inject.{Inject, Singleton}
+import scala.jdk.CollectionConverters.*
 
 @Singleton
 class FirestoreUserRepository @Inject() (
     firestore: Firestore,
-    @Named("io") implicit val ec: ExecutionContext
+    blocking: Blocking.Service
 ) extends UserRepository
     with LazyLogging {
   private lazy val collection = firestore.collection("users")
@@ -41,8 +41,8 @@ class FirestoreUserRepository @Inject() (
     }
   }
 
-  override def findBy(teamId: String, userId: String): Future[Option[User]] =
-    Future {
+  override def findBy(teamId: String, userId: String): Task[Option[User]] =
+    blocking.effectBlocking {
       val snapshot = collection.document(documentId(teamId, userId)).get().get()
       if (snapshot.exists()) {
         mapToUser(snapshot.getData)
@@ -51,8 +51,8 @@ class FirestoreUserRepository @Inject() (
       }
     }
 
-  override def findBy(mail: String): Future[Option[User]] =
-    Future {
+  override def findBy(mail: String): Task[Option[User]] =
+    blocking.effectBlocking {
       val query = collection.whereEqualTo("mail", mail).get()
       extractUser(query)
     }
@@ -69,8 +69,8 @@ class FirestoreUserRepository @Inject() (
     }
   }
 
-  override def store(user: User): Future[Unit] =
-    Future {
+  override def store(user: User): Task[Unit] =
+    blocking.effectBlocking {
       val doc = collection.document(documentId(user))
       doc.set(userToMap(user)).get()
     }

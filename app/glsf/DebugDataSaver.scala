@@ -1,7 +1,7 @@
 package glsf
 
-import scala.concurrent.Future
+import zio.Task
 
 trait DebugDataSaver {
-  def save(value: Map[String, String]): Future[Unit]
+  def save(value: Map[String, String]): Task[Unit]
 }
