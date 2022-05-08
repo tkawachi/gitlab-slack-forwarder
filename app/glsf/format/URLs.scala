@@ -13,24 +13,26 @@ case class URLs(
 ) {
 
   private def shortUrls = List(
-    job.map(u => s"<$u|Job>"),
-    pipeline.map(u => s"<$u|Pipeline>"),
-    mergeRequest.map(u => s"<$u|MR>"),
-    issue.map(u => s"<$u|Issue>"),
-    commit.map(u => s"<$u|Commit>"),
-    branch.map(u => s"<$u|Branch>")
+    job.map(Link(_, "Job")),
+    pipeline.map(Link(_, "Pipeline")),
+    mergeRequest.map(Link(_, "MR")),
+    issue.map(Link(_, "Issue")),
+    commit.map(Link(_, "Commit")),
+    branch.map(Link(_, "Branch"))
   ).flatten
 
   /** others を除くものを slack の mrkdwn 形式に。
     */
-  def shortAsMrkdwn: String = shortUrls.mkString(" ")
+  def shortAsMrkdwn: String = shortUrls.map(_.toMrkdwn).mkString(" ")
 
   def asMrkdwn: String =
     (shortUrls ++ others.map { u =>
       val last = u.split('/').last
       val text = if (last.isEmpty) u else last
-      s"<$u|$text>"
-    }).mkString(" ")
+      Link(u, text)
+    })
+      .map(_.toMrkdwn)
+      .mkString(" ")
 
   def enough: Boolean =
     job
