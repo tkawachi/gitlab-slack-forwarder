@@ -1,9 +1,7 @@
 package glsf.format
 
-import javax.inject.Singleton
-
 private[format] class FooterParser {
-  import FooterParser._
+  import FooterParser.*
 
   def parse(text: String): Option[BodyFooter] = {
     footerPat.findPrefixMatchOf(text).map { m =>
