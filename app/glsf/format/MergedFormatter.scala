@@ -5,7 +5,7 @@ import javax.inject.Inject
 private[format] class MergedFormatter @Inject() (footerParser: FooterParser)
     extends MaybeFormatter {
 
-  private val pat = """(?m)^(Merge Request ![0-9]+ was merged)$""".r
+  private val pat = """(?mi)^(Merge Request ![0-9]+ was merged)$""".r
 
   override def format(message: MailMessage): Option[SlackMessage] = {
     for {

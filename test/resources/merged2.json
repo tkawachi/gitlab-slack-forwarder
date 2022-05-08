@@ -1,0 +1,32 @@
+{
+  "subject": [
+    "Re: project1 | the title of MR (!123)"
+  ],
+  "text": [
+    "\n\nMerge request !123 was merged\nMerge request URL: https://gitlab.example.com/GROUP1/project1/-/merge_requests/123\nBranches: branch-123 to master\nAuthor: User1\nAssignees: \nReviewer: User2\n\n-- \nView it on GitLab: https://gitlab.example.com/GROUP1/project1/-/merge_requests/123\nYou're receiving this email because of your account on gitlab.example.com.\n\n\n"
+  ],
+  "to": [
+    "aaaaa@example.com"
+  ],
+  "SPF": [
+    "pass"
+  ],
+  "sender_ip": [
+  ],
+  "from": [
+    "User1 (@user1) <gitlab@example.com>"
+  ],
+  "envelope": [
+  ],
+  "attachments": [
+  ],
+  "charsets": [
+  ],
+  "dkim": [
+  ],
+  "headers": [
+  ],
+  "html": [
+    ""
+  ]
+}
