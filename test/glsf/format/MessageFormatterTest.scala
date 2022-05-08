@@ -9,25 +9,9 @@ class MessageFormatterTest extends AnyFunSuite {
 
   private val testCases =
     Seq(
-      "added-as-approver1",
-      "all-discussion-resolved1",
-      "approve1",
-      "assignee-changed1",
       "comment1",
       "comment2",
-      "issue-closed1",
-      "issue-closed-via-mr1",
-      "merged1",
-      "mr-closed1",
-      "new-issue1",
-      "new-mr1",
-      "pipeline-failed1",
-      "pipeline-fixed1",
-      "pushed1",
-      "conflict1",
-      "review1",
-      "reviewer-changed1",
-      "mr-scheduled-to-merge1"
+      "review1"
     )
 
   testCases.foreach { tc =>
