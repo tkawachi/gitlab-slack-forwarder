@@ -20,7 +20,7 @@ lazy val root = (project in file("."))
       "com.slack.api" % "slack-api-client" % "1.22.1",
       "com.google.firebase" % "firebase-admin" % "8.2.0",
       "com.google.cloud" % "google-cloud-logging-logback" % "0.120.8-alpha" % Runtime,
-      "dev.zio" %% "zio" % "1.0.14"
+      "dev.zio" %% "zio" % "1.0.15"
     ),
     dockerBaseImage := "openjdk:11.0-slim",
     dockerRepository := Some("us.gcr.io/gitlabslackforwarder")
