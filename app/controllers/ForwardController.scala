@@ -8,7 +8,7 @@ import glsf.{DebugDataSaver, TeamTokenRepository, User, UserRepository}
 import play.api.libs.Files
 import play.api.libs.json.Json
 import play.api.mvc.*
-import zio.{IO, Runtime, Task, ZEnv, ZIO}
+import zio.{IO, Runtime, Unsafe, ZIO}
 
 import javax.inject.{Inject, Singleton}
 import scala.jdk.CollectionConverters.*
@@ -20,7 +20,7 @@ class ForwardController @Inject() (
     teamTokenRepository: TeamTokenRepository,
     debugDataSaver: DebugDataSaver,
     messageFormatter: MessageFormatter,
-    runtime: Runtime[ZEnv]
+    runtime: Runtime[Any]
 ) extends AbstractController(cc)
     with LazyLogging {
 
@@ -53,7 +53,7 @@ class ForwardController @Inject() (
         NotFound
       }
       .map { teamToken =>
-        logger.info(s"Send messag to Slack: $user")
+        logger.info(s"Send message to Slack: $user")
         val m = slack.methods(teamToken.botAccessToken)
         val message = ChatPostMessageRequest
           .builder()
@@ -72,18 +72,20 @@ class ForwardController @Inject() (
       data: Map[String, Seq[String]]
   ): IO[Result, Seq[String]] = {
     for {
-      envelopes <- IO.fromOption(data.get("envelope")).mapError { _ =>
+      envelopes <- ZIO.fromOption(data.get("envelope")).mapError { _ =>
         logger.info(s"envelope not found: $data")
         BadRequest("envelope not found")
       }
-      envelope <- IO.fromOption(envelopes.headOption).mapError { _ =>
+      envelope <- ZIO.fromOption(envelopes.headOption).mapError { _ =>
         logger.info(s"envelope is empty: $data")
         BadRequest("envelope is empty")
       }
-      tos <- Task((Json.parse(envelope) \ "to").as[Seq[String]]).mapError { e =>
-        logger.info(s"envelope is not a json", e)
-        BadRequest("Invalid json")
-      }
+      tos <- ZIO
+        .attempt((Json.parse(envelope) \ "to").as[Seq[String]])
+        .mapError { e =>
+          logger.info(s"envelope is not a json", e)
+          BadRequest("Invalid json")
+        }
     } yield tos
   }
 
@@ -109,11 +111,14 @@ class ForwardController @Inject() (
       // ref. https://sendgrid.com/docs/for-developers/parsing-email/setting-up-the-inbound-parse-webhook/
       val data = request.body.dataParts
       val message = MailMessage(data)
-      runtime.unsafeRunToFuture((for {
+      val io = (for {
         tos <- parseEnvelopeTo(data)
         user <- findUser(tos.head) // TODO
         slackMessage <- formatMessage(message)
         _ <- notifySlack(user, slackMessage)
-      } yield Ok("")).merge)
+      } yield Ok("")).merge
+      Unsafe.unsafe { implicit u =>
+        runtime.unsafe.runToFuture(io)
+      }
     }
 }
