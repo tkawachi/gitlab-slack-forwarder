@@ -3,8 +3,7 @@ package glsf
 import com.google.api.core.ApiFuture
 import com.google.cloud.firestore.{FieldValue, Firestore, QuerySnapshot}
 import com.typesafe.scalalogging.LazyLogging
-import zio.Task
-import zio.blocking.Blocking
+import zio.{Task, ZIO}
 
 import java.util as ju
 import javax.inject.{Inject, Singleton}
@@ -12,8 +11,7 @@ import scala.jdk.CollectionConverters.*
 
 @Singleton
 class FirestoreUserRepository @Inject() (
-    firestore: Firestore,
-    blocking: Blocking.Service
+    firestore: Firestore
 ) extends UserRepository
     with LazyLogging {
   private lazy val collection = firestore.collection("users")
@@ -42,7 +40,7 @@ class FirestoreUserRepository @Inject() (
   }
 
   override def findBy(teamId: String, userId: String): Task[Option[User]] =
-    blocking.effectBlocking {
+    ZIO.attemptBlocking {
       val snapshot = collection.document(documentId(teamId, userId)).get().get()
       if (snapshot.exists()) {
         mapToUser(snapshot.getData)
@@ -52,7 +50,7 @@ class FirestoreUserRepository @Inject() (
     }
 
   override def findBy(mail: String): Task[Option[User]] =
-    blocking.effectBlocking {
+    ZIO.attemptBlocking {
       val query = collection.whereEqualTo("mail", mail).get()
       extractUser(query)
     }
@@ -70,7 +68,7 @@ class FirestoreUserRepository @Inject() (
   }
 
   override def store(user: User): Task[Unit] =
-    blocking.effectBlocking {
+    ZIO.attemptBlocking {
       val doc = collection.document(documentId(user))
       doc.set(userToMap(user)).get()
     }

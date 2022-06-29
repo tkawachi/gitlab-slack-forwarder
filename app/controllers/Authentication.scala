@@ -3,7 +3,7 @@ package controllers
 import com.typesafe.scalalogging.LazyLogging
 import glsf.{User, UserRepository}
 import play.api.mvc.Request
-import zio.{Task, UIO}
+import zio.{Task, ZIO}
 
 import javax.inject.Inject
 
@@ -18,12 +18,12 @@ class Authentication @Inject() (
 
   def auth(request: Request[_]): Task[Option[User]] =
     for {
-      maybeIds <- UIO(auth2(request))
+      maybeIds <- ZIO.succeed(auth2(request))
       maybeUser <-
         maybeIds
           .map { case (teamId, userId) =>
             userRepository.findBy(teamId, userId)
           }
-          .getOrElse(Task.none)
+          .getOrElse(ZIO.none)
     } yield maybeUser
 }
