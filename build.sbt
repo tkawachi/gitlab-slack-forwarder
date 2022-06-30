@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
       "com.slack.api" % "slack-api-client" % "1.22.3",
-      "com.google.firebase" % "firebase-admin" % "8.2.0",
+      "com.google.firebase" % "firebase-admin" % "9.0.0",
       "com.google.cloud" % "google-cloud-logging-logback" % "0.120.8-alpha" % Runtime,
       "dev.zio" %% "zio" % "2.0.0"
     ),
