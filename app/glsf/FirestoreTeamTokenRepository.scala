@@ -1,8 +1,7 @@
 package glsf
 
 import com.google.cloud.firestore.{FieldValue, Firestore}
-import zio.Task
-import zio.blocking.Blocking
+import zio.{Task, ZIO}
 
 import java.util as ju
 import javax.inject.{Inject, Singleton}
@@ -10,8 +9,7 @@ import scala.jdk.CollectionConverters.*
 
 @Singleton
 class FirestoreTeamTokenRepository @Inject() (
-    firestore: Firestore,
-    blocking: Blocking.Service
+    firestore: Firestore
 ) extends TeamTokenRepository {
   private val collection = firestore.collection("teams")
 
@@ -48,7 +46,7 @@ class FirestoreTeamTokenRepository @Inject() (
   }
 
   override def findBy(teamId: String): Task[Option[TeamToken]] =
-    blocking.effectBlocking {
+    ZIO.attemptBlocking {
       val snapshot = collection.document(teamId).get().get()
       if (snapshot.exists()) {
         mapToTeamToken(snapshot.getData)
@@ -58,7 +56,7 @@ class FirestoreTeamTokenRepository @Inject() (
     }
 
   override def store(teamToken: TeamToken): Task[Unit] =
-    blocking.effectBlocking {
+    ZIO.attemptBlocking {
       val doc = collection.document(teamToken.teamId)
       doc.set(teamTokenToMap(teamToken)).get()
     }

@@ -2,7 +2,7 @@ package controllers
 
 import glsf.{SlackConfig, TeamToken, TeamTokenRepository}
 import play.api.mvc.*
-import zio.{Runtime, Task, ZEnv}
+import zio.{Runtime, Task, Unsafe, ZIO}
 
 import javax.inject.*
 
@@ -15,7 +15,7 @@ class HomeController @Inject() (
     slackConfig: SlackConfig,
     authentication: Authentication,
     teamTokenRepository: TeamTokenRepository,
-    runtime: Runtime[ZEnv]
+    runtime: Runtime[Any]
 ) extends BaseController {
 
   private def findTeamToken(teamId: String): Task[Option[TeamToken]] =
@@ -32,7 +32,7 @@ class HomeController @Inject() (
         maybeUser <- authentication.auth(request)
         maybeTeamToken <- maybeUser
           .map(u => findTeamToken(u.teamId))
-          .getOrElse(Task.none)
+          .getOrElse(ZIO.none)
       } yield Ok(
         views.html
           .index(
@@ -43,7 +43,9 @@ class HomeController @Inject() (
             slackConfig.addRedirectUri
           )
       )
-      runtime.unsafeRunToFuture(io)
+      Unsafe.unsafe { implicit u =>
+        runtime.unsafe.runToFuture(io)
+      }
     }
 
   def privacyPolicy(): Action[AnyContent] =

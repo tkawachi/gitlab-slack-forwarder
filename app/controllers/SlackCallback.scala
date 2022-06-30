@@ -5,7 +5,7 @@ import glsf.*
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.*
-import zio.{IO, Runtime, Task, ZEnv, ZIO}
+import zio.{IO, Runtime, Unsafe, ZIO}
 
 import javax.inject.{Inject, Singleton}
 
@@ -17,7 +17,7 @@ class SlackCallback @Inject() (
     mailGenerator: MailGenerator,
     userRepository: UserRepository,
     teamTokenRepository: TeamTokenRepository,
-    runtime: Runtime[ZEnv]
+    runtime: Runtime[Any]
 ) extends AbstractController(cc)
     with LazyLogging {
 
@@ -35,7 +35,7 @@ class SlackCallback @Inject() (
       code: String,
       redirectUri: String
   ): IO[Result, JsValue] = {
-    zio.Task
+    ZIO
       .fromFuture(_ =>
         ws.url(slackConfig.accessUrl)
           .post(
@@ -59,7 +59,8 @@ class SlackCallback @Inject() (
         )
       )
       .flatMap { resp =>
-        Task(Json.parse(resp.body))
+        ZIO
+          .attempt(Json.parse(resp.body))
           .mapError { e =>
             logger.error("Slack returns invalid JSON", e)
             BadRequest(
@@ -70,7 +71,8 @@ class SlackCallback @Inject() (
   }
 
   private def checkOk(json: JsValue): IO[Result, Unit] =
-    Task((json \ "ok").as[Boolean])
+    ZIO
+      .attempt((json \ "ok").as[Boolean])
       .mapError { e =>
         logger.warn("Slack response doesn't contain 'ok'", e)
         BadRequest(
@@ -139,7 +141,7 @@ class SlackCallback @Inject() (
 
   def signIn: Action[AnyContent] =
     Action.async { request =>
-      runtime.unsafeRunToFuture((for {
+      val io = (for {
         code <- getCode(request)
         json <- getAccessJson(code, slackConfig.signInRedirectUri)
         _ <- checkOk(json)
@@ -149,12 +151,15 @@ class SlackCallback @Inject() (
       } yield {
         Redirect(routes.HomeController.index()).withNewSession
           .withSession("teamId" -> user.teamId, "userId" -> user.userId)
-      }).merge)
+      }).merge
+      Unsafe.unsafe { implicit u =>
+        runtime.unsafe.runToFuture(io)
+      }
     }
 
   def add: Action[AnyContent] =
     Action.async { request =>
-      runtime.unsafeRunToFuture((for {
+      val io = (for {
         code <- getCode(request)
         json <- getAccessJson(code, slackConfig.addRedirectUri)
         _ <- checkOk(json)
@@ -171,6 +176,9 @@ class SlackCallback @Inject() (
           logger.error("TeamTokenRepository.store", e)
           InternalServerError
         }
-      } yield Redirect(routes.HomeController.index())).merge)
+      } yield Redirect(routes.HomeController.index())).merge
+      Unsafe.unsafe { implicit u =>
+        runtime.unsafe.runToFuture(io)
+      }
     }
 }

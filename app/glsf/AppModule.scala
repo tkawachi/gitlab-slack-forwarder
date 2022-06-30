@@ -5,13 +5,11 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.*
-import zio.blocking.Blocking
-import zio.{Runtime, ZEnv}
+import zio.Runtime
 
 class AppModule extends AbstractModule with LazyLogging {
   override def configure(): Unit = {
-    bind(new TypeLiteral[Runtime[ZEnv]] {}).toInstance(Runtime.default)
-    bind(classOf[Blocking.Service]).toInstance(Blocking.Service.live)
+    bind(new TypeLiteral[Runtime[Any]] {}).toInstance(Runtime.default)
   }
 
   @Provides

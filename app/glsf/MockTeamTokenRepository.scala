@@ -1,6 +1,6 @@
 package glsf
 
-import zio.Task
+import zio.{Task, ZIO}
 
 import javax.inject.Singleton
 import scala.collection.mutable.ListBuffer
@@ -10,10 +10,10 @@ class MockTeamTokenRepository extends TeamTokenRepository {
   private[this] val tokens = ListBuffer.empty[TeamToken]
 
   override def findBy(teamId: String): Task[Option[TeamToken]] =
-    Task.succeed(tokens.find(t => t.teamId == teamId))
+    ZIO.succeed(tokens.find(t => t.teamId == teamId))
 
   override def store(teamToken: TeamToken): Task[Unit] =
-    Task.succeed {
+    ZIO.succeed {
       tokens.addOne(teamToken)
       ()
     }
