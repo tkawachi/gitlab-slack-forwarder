@@ -1,0 +1,2 @@
+# gitlab-slack-forwarder
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c278b308e7fc4504ac8427b4901ded63)](https://app.codacy.com/gh/tkawachi/gitlab-slack-forwarder?utm_source=github.com&utm_medium=referral&utm_content=tkawachi/gitlab-slack-forwarder&utm_campaign=Badge_Grade_Settings)
