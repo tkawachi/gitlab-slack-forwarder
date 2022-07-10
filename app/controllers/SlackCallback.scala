@@ -1,11 +1,13 @@
 package controllers
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.interfaces.Payload
 import com.typesafe.scalalogging.LazyLogging
 import glsf.*
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.*
-import zio.{IO, Runtime, Unsafe, ZIO}
+import zio.{IO, Runtime, UIO, Unsafe, ZIO}
 
 import javax.inject.{Inject, Singleton}
 
@@ -21,7 +23,7 @@ class SlackCallback @Inject() (
 ) extends AbstractController(cc)
     with LazyLogging {
 
-  private def getCode(request: Request[_]): IO[Result, String] =
+  private def getCode(request: RequestHeader): IO[Result, String] =
     ZIO
       .fromOption(request.getQueryString("code"))
       .mapError(_ =>
@@ -139,14 +141,58 @@ class SlackCallback @Inject() (
       }
   }
 
+  private def getTeamId(jwt: Payload): UIO[Option[String]] =
+    ZIO.succeed(Option(jwt.getClaim("https://slack.com/team_id").asString()))
+
+  private def getUserId(jwt: Payload): UIO[Option[String]] =
+    ZIO.succeed(Option(jwt.getClaim("https://slack.com/user_id").asString()))
+
+  private def parseUserIdAndTeamId(
+      json: JsValue
+  ): IO[Result, (String, String)] = for {
+    idToken <- ZIO
+      .attempt((json \ "id_token").as[String])
+      .catchAll { e =>
+        logger.error("Failed to parse id_token", e)
+        ZIO.fail(
+          BadRequest(
+            views.html.error("Slack error", "Failed to parse id_token")
+          )
+        )
+      }
+    jwt <- ZIO
+      .attempt(JWT.decode(idToken))
+      .catchAll { e =>
+        logger.error("Failed to decode JWT", e)
+        ZIO.fail(
+          BadRequest(
+            views.html.error("Slack error", "Failed to decode id_token")
+          )
+        )
+      }
+    userId <- getUserId(jwt).someOrFail {
+      logger.error("user_id claim not found")
+      BadRequest(
+        views.html.error("Slack error", "Failed to parse user_id")
+      )
+    }
+    teamId <- getTeamId(jwt).someOrFail {
+      logger.error("team_id claim not found")
+      BadRequest(
+        views.html.error("Slack error", "Failed to parse team_id")
+      )
+    }
+  } yield userId -> teamId
+
+  // Callback of Sign in with slack
   def signIn: Action[AnyContent] =
     Action.async { request =>
       val io = (for {
         code <- getCode(request)
         json <- getAccessJson(code, slackConfig.signInRedirectUri)
         _ <- checkOk(json)
-        userId = (json \ "authed_user" \ "id").as[String]
-        teamId = (json \ "team" \ "id").as[String]
+        userIdAndTeamId <- parseUserIdAndTeamId(json)
+        (userId, teamId) = userIdAndTeamId
         user <- getOrCreateUser(teamId, userId)
       } yield {
         Redirect(routes.HomeController.index()).withNewSession
