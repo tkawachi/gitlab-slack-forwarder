@@ -7,6 +7,27 @@ inThisBuild(
   )
 )
 
+// ref https://github.com/orgs/playframework/discussions/11222
+val jacksonVersion = "2.13.3"
+val jacksonDatabindVersion = "2.13.3"
+
+val jacksonOverrides = Seq(
+  "com.fasterxml.jackson.core" % "jackson-core",
+  "com.fasterxml.jackson.core" % "jackson-annotations",
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8",
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310"
+).map(_ % jacksonVersion)
+
+val jacksonDatabindOverrides = Seq(
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonDatabindVersion
+)
+
+val akkaSerializationJacksonOverrides = Seq(
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor",
+  "com.fasterxml.jackson.module" % "jackson-module-parameter-names",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala"
+).map(_ % jacksonVersion)
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(
@@ -22,7 +43,7 @@ lazy val root = (project in file("."))
       "com.google.firebase" % "firebase-admin" % "9.0.0",
       "com.google.cloud" % "google-cloud-logging-logback" % "0.120.8-alpha" % Runtime,
       "dev.zio" %% "zio" % "2.0.0"
-    ),
+    ) ++ jacksonDatabindOverrides ++ jacksonOverrides ++ akkaSerializationJacksonOverrides,
     dockerBaseImage := "openjdk:11.0-slim",
     dockerRepository := Some("us.gcr.io/gitlabslackforwarder")
   )
