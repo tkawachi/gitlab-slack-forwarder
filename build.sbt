@@ -2,7 +2,7 @@ inThisBuild(
   Seq(
     organization := "net.pikot",
     version := "1.0-SNAPSHOT",
-    scalaVersion := "2.13.9",
+    scalaVersion := "2.13.10",
     scalacOptions ++= Seq("-Xsource:3")
   )
 )
