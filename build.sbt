@@ -40,7 +40,7 @@ lazy val root = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
       "com.slack.api" % "slack-api-client" % "1.27.0",
-      "com.google.firebase" % "firebase-admin" % "9.1.0",
+      "com.google.firebase" % "firebase-admin" % "9.1.1",
       "com.google.cloud" % "google-cloud-logging-logback" % "0.120.8-alpha" % Runtime,
       "dev.zio" %% "zio" % "2.0.3"
     ) ++ jacksonDatabindOverrides ++ jacksonOverrides ++ akkaSerializationJacksonOverrides,
