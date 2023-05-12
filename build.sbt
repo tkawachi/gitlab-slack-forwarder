@@ -36,7 +36,7 @@ lazy val root = (project in file("."))
       guice,
       ws,
       "com.auth0" % "java-jwt" % "4.4.0",
-      "com.github.pureconfig" %% "pureconfig" % "0.17.3",
+      "com.github.pureconfig" %% "pureconfig" % "0.17.4",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
       "com.slack.api" % "slack-api-client" % "1.29.2",
