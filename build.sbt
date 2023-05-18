@@ -8,7 +8,7 @@ inThisBuild(
 )
 
 // ref https://github.com/orgs/playframework/discussions/11222
-val jacksonVersion = "2.15.0"
+val jacksonVersion = "2.15.1"
 val jacksonDatabindVersion = "2.15.1"
 
 val jacksonOverrides = Seq(
