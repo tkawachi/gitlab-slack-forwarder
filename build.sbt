@@ -40,7 +40,10 @@ lazy val root = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
       "com.slack.api" % "slack-api-client" % "1.32.0",
-      "com.google.firebase" % "firebase-admin" % "9.2.0",
+      // SLF4J 2.x can't be used with Play 2.8.x
+      // https://github.com/playframework/playframework/issues/11499
+      ("com.google.firebase" % "firebase-admin" % "9.2.0")
+        .exclude("org.slf4j", "slf4j-api"),
       "com.google.cloud" % "google-cloud-logging-logback" % "0.120.8-alpha" % Runtime,
       "dev.zio" %% "zio" % "2.0.17"
     ) ++ jacksonDatabindOverrides ++ jacksonOverrides ++ akkaSerializationJacksonOverrides,
