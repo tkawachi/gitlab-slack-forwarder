@@ -3,7 +3,7 @@ inThisBuild(
     organization := "net.pikot",
     version := "1.0-SNAPSHOT",
     scalaVersion := "2.13.12",
-    scalacOptions ++= Seq("-Xsource:3")
+    scalacOptions ++= Seq("-Xsource:3", "-Xmigration:2.13")
   )
 )
 
