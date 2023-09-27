@@ -45,7 +45,7 @@ lazy val root = (project in file("."))
       ("com.google.firebase" % "firebase-admin" % "9.2.0")
         .exclude("org.slf4j", "slf4j-api"),
       "com.google.cloud" % "google-cloud-logging-logback" % "0.120.8-alpha" % Runtime,
-      "dev.zio" %% "zio" % "2.0.17"
+      "dev.zio" %% "zio" % "2.0.18"
     ) ++ jacksonDatabindOverrides ++ jacksonOverrides ++ akkaSerializationJacksonOverrides,
     dockerBaseImage := "openjdk:11.0-slim",
     dockerRepository := Some("us.gcr.io/gitlabslackforwarder")
