@@ -39,7 +39,7 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig" % "0.17.4",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
-      "com.slack.api" % "slack-api-client" % "1.32.0",
+      "com.slack.api" % "slack-api-client" % "1.32.2",
       // SLF4J 2.x can't be used with Play 2.8.x
       // https://github.com/playframework/playframework/issues/11499
       ("com.google.firebase" % "firebase-admin" % "9.2.0")
