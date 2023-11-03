@@ -37,7 +37,7 @@ lazy val root = (project in file("."))
       ws,
       "com.auth0" % "java-jwt" % "4.4.0",
       "com.github.pureconfig" %% "pureconfig" % "0.17.4",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
       "com.slack.api" % "slack-api-client" % "1.32.2",
       // SLF4J 2.x can't be used with Play 2.8.x
